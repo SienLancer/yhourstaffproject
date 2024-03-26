@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -33,6 +34,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
@@ -54,6 +56,7 @@ public class StaffHomeFragment extends Fragment {
     ImageButton scanQr_imgBtn;
     Button timer_btn;
     private Calendar currentTime;
+    ValueEventListener valueEventListener;
     TextView scan_txt;
     FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
@@ -64,6 +67,7 @@ public class StaffHomeFragment extends Fragment {
         scanQr_imgBtn = mView.findViewById(R.id.scanQr_imgBtn);
         scan_txt = mView.findViewById(R.id.scan_txt);
         timer_btn = mView.findViewById(R.id.timer_btn);
+        setupTimerButtonVisibilityListener();
 
         timer_btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -260,6 +264,64 @@ public class StaffHomeFragment extends Fragment {
             Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
         }
     }
+
+    public void setupTimerButtonVisibilityListener() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user != null) {
+            String userId = user.getUid();
+            DatabaseReference userReference = firebaseDatabase.getReference("User").child(userId).child("timekeeping");
+
+            Query query = userReference.orderByChild("timestamp").limitToLast(1);
+
+            ValueEventListener valueEventListener = new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        boolean checkoutExists = false;
+                        // Kiểm tra nếu có ít nhất một mục có trường checkout không rỗng
+                        for (DataSnapshot childSnapshot : snapshot.getChildren()) {
+                            String checkoutTime = childSnapshot.child("checkOut").getValue(String.class);
+                            if (checkoutTime != null && !checkoutTime.isEmpty()) {
+                                checkoutExists = true;
+                                break;
+                            }
+                        }
+                        // Cập nhật giao diện dựa trên tồn tại của checkout
+                        if (checkoutExists) {
+                            timer_btn.setVisibility(View.GONE);
+                        } else {
+                            timer_btn.setVisibility(View.VISIBLE);
+                        }
+                    } else {
+                        // Không có dữ liệu, hiển thị nút Timer
+                        timer_btn.setVisibility(View.VISIBLE);
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    // Xử lý lỗi nếu có
+                    Toast.makeText(getContext(), "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            };
+
+            // Gắn lắng nghe vào truy vấn
+            query.addValueEventListener(valueEventListener);
+
+            // Lưu trữ ValueEventListener để có thể loại bỏ lắng nghe sau này nếu cần
+            // (ví dụ: trong phương thức onDestroy của Activity hoặc Fragment)
+            // Đảm bảo rằng bạn cần loại bỏ lắng nghe khi không cần thiết để tránh rò rỉ bộ nhớ.
+            // Đối với Fragment, bạn có thể sử dụng onViewCreated hoặc onCreate để gắn lắng nghe
+            // và sử dụng onDestroyView hoặc onDestroy để loại bỏ nó.
+            // Đối với Activity, bạn có thể sử dụng onStart và onStop tương tự.
+            // Ví dụ:
+            // query.removeEventListener(valueEventListener);
+        } else {
+            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
 
 
 
