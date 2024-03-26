@@ -24,7 +24,9 @@
         <activity
             android:name=".activities.BottomTabActivity"
             android:exported="false"></activity>
-
+        <activity
+            android:name=".activities.CalendarActivity"
+            android:exported="false"></activity>
 
         <activity
             android:name=".activities.SplashActivity"
