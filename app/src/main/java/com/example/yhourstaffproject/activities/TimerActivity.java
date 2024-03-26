@@ -31,7 +31,11 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 
 public class TimerActivity extends AppCompatActivity {
@@ -39,6 +43,7 @@ public class TimerActivity extends AppCompatActivity {
     private TextView timerTextView;
     private boolean hasCheckedOut = false;
     private Button checkoutButton;
+    private Calendar currentTime;
     private static final String PREFS_NAME = "MyPrefsFile";
 
 
@@ -56,6 +61,9 @@ public class TimerActivity extends AppCompatActivity {
         timerTextView = findViewById(R.id.timer_text_view);
         checkoutButton = findViewById(R.id.checkout_button);
 
+        currentTime = Calendar.getInstance(); // Lấy thời gian hiện tại
+
+
         checkoutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -71,23 +79,37 @@ public class TimerActivity extends AppCompatActivity {
             }
         });
 
-        startTimer();
+        displayCurrentTime();
     }
 
-    private void startTimer() {
-        countUpTimer = new CountDownTimer(Long.MAX_VALUE, 1000) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-                timeElapsedInMillis += 1000;
-                updateCountdownText();
-            }
+    private void displayCurrentTime() {
+        int year = currentTime.get(Calendar.YEAR);
+        int month = currentTime.get(Calendar.MONTH) + 1; // Tháng bắt đầu từ 0
+        int day = currentTime.get(Calendar.DAY_OF_MONTH);
+        int hour = currentTime.get(Calendar.HOUR_OF_DAY);
+        int minute = currentTime.get(Calendar.MINUTE);
+        int second = currentTime.get(Calendar.SECOND);
 
-            @Override
-            public void onFinish() {
-                // Not used in count up timer
-            }
-        }.start();
+        // Hiển thị thông tin về thời gian lên giao diện người dùng
+        String currentTimeString = String.format(Locale.getDefault(), "%02d/%02d/%d %02d:%02d:%02d", day, month, year, hour, minute, second);
+        timerTextView.setText(currentTimeString);
+
     }
+
+//    private void startTimer() {
+//        countUpTimer = new CountDownTimer(Long.MAX_VALUE, 1000) {
+//            @Override
+//            public void onTick(long millisUntilFinished) {
+//                timeElapsedInMillis += 1000;
+//                updateCountdownText();
+//            }
+//
+//            @Override
+//            public void onFinish() {
+//                // Not used in count up timer
+//            }
+//        }.start();
+//    }
     @Override
     public void onBackPressed() {
         if (!hasCheckedOut) {
@@ -102,7 +124,7 @@ public class TimerActivity extends AppCompatActivity {
 
 
     private void stopTimer() {
-        countUpTimer.cancel();
+//        countUpTimer.cancel();
         hasCheckedOut = true;
         Intent intent = new Intent(this, StaffHomeFragment.class);
         startActivity(intent);
@@ -130,20 +152,33 @@ public class TimerActivity extends AppCompatActivity {
     }
 
     private void handleQRCodeResult(String contents) {
-        long totalTimeInSeconds = timeElapsedInMillis / 1000;
+        // Lấy thời gian hiện tại từ timerTextView
+        Calendar checkoutTime = Calendar.getInstance();
+        String timerText = timerTextView.getText().toString();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
+        try {
+            Date parsedDate = dateFormat.parse(timerText);
+            checkoutTime.setTime(parsedDate);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return;
+        }
 
-        // Chuyển đổi thời gian từ giây thành giờ
-        double totalHours = totalTimeInSeconds / 3600.0;
+        // Tính toán thời gian giữa checkoutTime và thời gian đã set trước đó
+        long timeDifferenceInMillis = checkoutTime.getTimeInMillis() - currentTime.getTimeInMillis();
+
+        // Chuyển đổi thời gian từ millis thành giờ
+        double totalHours = timeDifferenceInMillis / (1000.0 * 3600);
 
         // Tính số tiền tương ứng
-        double totalCost = totalHours * 15000; // Giả sử mỗi giờ là 15,000 VND
+        double totalCost = Math.abs(totalHours) * 15000; // Sử dụng giá trị tuyệt đối của totalHours
 
         // Hiển thị số tiền lên giao diện người dùng
         Toast.makeText(this, String.format(Locale.getDefault(), "Total cost: %.0f VND", totalCost), Toast.LENGTH_SHORT).show();
 
         // Dừng đồng hồ và thực hiện các hành động khác (nếu cần)
-        // TODO: Handle QR code content, e.g., stop timer, navigate to checkout page
         stopTimer();
         // Navigate to checkout page or perform checkout-related actions
     }
+
 }
