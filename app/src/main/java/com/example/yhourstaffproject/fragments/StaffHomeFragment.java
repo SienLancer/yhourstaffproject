@@ -9,6 +9,7 @@ import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,6 +38,7 @@ import java.util.Calendar;
 public class StaffHomeFragment extends Fragment {
     private View mView;
     ImageButton scanQr_imgBtn;
+    Button timer_btn;
     TextView scan_txt;
     FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
@@ -46,6 +48,15 @@ public class StaffHomeFragment extends Fragment {
         mView =inflater.inflate(R.layout.fragment_staff_home, container, false);
         scanQr_imgBtn = mView.findViewById(R.id.scanQr_imgBtn);
         scan_txt = mView.findViewById(R.id.scan_txt);
+        timer_btn = mView.findViewById(R.id.timer_btn);
+
+        timer_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), TimerActivity.class);
+                startActivity(intent);
+            }
+        });
 
         scanQr_imgBtn.setOnClickListener(new View.OnClickListener() {
             @Override

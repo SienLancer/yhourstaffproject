@@ -3,6 +3,7 @@ package com.example.yhourstaffproject.activities;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -23,6 +24,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.yhourstaffproject.R;
+import com.example.yhourstaffproject.fragments.StaffHomeFragment;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
@@ -35,7 +37,11 @@ import java.util.Locale;
 public class TimerActivity extends AppCompatActivity {
 
     private TextView timerTextView;
+    private boolean hasCheckedOut = false;
     private Button checkoutButton;
+    private static final String PREFS_NAME = "MyPrefsFile";
+
+
 
     private CountDownTimer countUpTimer;
     private long timeElapsedInMillis;
@@ -82,9 +88,24 @@ public class TimerActivity extends AppCompatActivity {
             }
         }.start();
     }
+    @Override
+    public void onBackPressed() {
+        if (!hasCheckedOut) {
+            // Nếu chưa thực hiện checkout, không cho phép quay lại
+            Toast.makeText(this, "Please checkout before leaving", Toast.LENGTH_SHORT).show();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+
+
 
     private void stopTimer() {
         countUpTimer.cancel();
+        hasCheckedOut = true;
+        Intent intent = new Intent(this, StaffHomeFragment.class);
+        startActivity(intent);
     }
 
     private void updateCountdownText() {
@@ -109,7 +130,18 @@ public class TimerActivity extends AppCompatActivity {
     }
 
     private void handleQRCodeResult(String contents) {
-        Toast.makeText(this, "QR Code content: " + contents, Toast.LENGTH_SHORT).show();
+        long totalTimeInSeconds = timeElapsedInMillis / 1000;
+
+        // Chuyển đổi thời gian từ giây thành giờ
+        double totalHours = totalTimeInSeconds / 3600.0;
+
+        // Tính số tiền tương ứng
+        double totalCost = totalHours * 15000; // Giả sử mỗi giờ là 15,000 VND
+
+        // Hiển thị số tiền lên giao diện người dùng
+        Toast.makeText(this, String.format(Locale.getDefault(), "Total cost: %.0f VND", totalCost), Toast.LENGTH_SHORT).show();
+
+        // Dừng đồng hồ và thực hiện các hành động khác (nếu cần)
         // TODO: Handle QR code content, e.g., stop timer, navigate to checkout page
         stopTimer();
         // Navigate to checkout page or perform checkout-related actions
