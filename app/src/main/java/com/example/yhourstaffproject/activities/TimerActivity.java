@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -89,7 +90,19 @@ public class TimerActivity extends AppCompatActivity {
             }
         });
 
-        getDataTimeKeeping();
+        Handler handler = new Handler();
+
+// Đợi 5 giây (ví dụ)
+        long delayMillis = 2000; // 5000 milliseconds = 5 seconds
+
+// Sử dụng Handler để chạy getDataTimeKeeping() sau khi đợi 5 giây
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                // Gọi hàm getDataTimeKeeping() sau khi đợi 5 giây
+                getDataTimeKeeping();
+            }
+        }, delayMillis);
     }
 
     public void getDataTimeKeeping() {

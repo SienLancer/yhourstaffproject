@@ -102,7 +102,7 @@ public class StaffHomeFragment extends Fragment {
     });
 
     private void setResult(String contents) {
-
+        addDataTimeKeeping();
         Toast.makeText(getContext(), "Timekeeping successful!", Toast.LENGTH_SHORT).show();
         startActivity(new Intent(getActivity(), TimerActivity.class));
     }
@@ -167,7 +167,7 @@ public class StaffHomeFragment extends Fragment {
             String qrcode = dateString + userId;
             String encodedString = Base64.encodeToString(qrcode.getBytes(), Base64.DEFAULT);
             firebaseDatabase.getReference().child("QRCode").child("codescan").setValue(encodedString);
-            addDataTimeKeeping();
+            //addDataTimeKeeping();
         }else if(shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
             Toast.makeText(context, "Camera permission required", Toast.LENGTH_SHORT).show();
         }else {
