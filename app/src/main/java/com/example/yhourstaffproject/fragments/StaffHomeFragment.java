@@ -27,6 +27,7 @@ import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
 
 import java.time.LocalDate;
+import java.util.Calendar;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -75,7 +76,7 @@ public class StaffHomeFragment extends Fragment {
 
     private void setResult(String contents) {
 
-        scan_txt.setText(contents);
+        Toast.makeText(getContext(), "Timekeeping successful!", Toast.LENGTH_SHORT).show();
         startActivity(new Intent(getActivity(), TimerActivity.class));
     }
 
@@ -125,6 +126,14 @@ public class StaffHomeFragment extends Fragment {
             int day = today.getDayOfMonth();
 
             String dateString = day + "/" + month + "/" + year;
+            // Lấy giờ và phút hiện tại
+            Calendar currentTime = Calendar.getInstance();
+            int hour = currentTime.get(Calendar.HOUR_OF_DAY);
+            int minute = currentTime.get(Calendar.MINUTE);
+
+            // Thêm giờ và phút vào chuỗi dateString
+            dateString += " " + hour + ":" + minute;
+
             FirebaseUser user = mAuth.getCurrentUser();
             String userId = user.getUid();
             String qrcode = dateString + userId;
