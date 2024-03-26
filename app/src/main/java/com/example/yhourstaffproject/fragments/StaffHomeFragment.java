@@ -1,11 +1,14 @@
 package com.example.yhourstaffproject.fragments;
 
+import static android.content.ContentValues.TAG;
+
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,19 +19,30 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.yhourstaffproject.R;
 import com.example.yhourstaffproject.activities.TimerActivity;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -39,6 +53,7 @@ public class StaffHomeFragment extends Fragment {
     private View mView;
     ImageButton scanQr_imgBtn;
     Button timer_btn;
+    private Calendar currentTime;
     TextView scan_txt;
     FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
@@ -53,8 +68,9 @@ public class StaffHomeFragment extends Fragment {
         timer_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), TimerActivity.class);
-                startActivity(intent);
+//                Intent intent = new Intent(getActivity(), TimerActivity.class);
+//                startActivity(intent);
+                //addDataTimeKeeping();
             }
         });
 
@@ -135,6 +151,7 @@ public class StaffHomeFragment extends Fragment {
             int year = today.getYear();
             int month = today.getMonthValue();
             int day = today.getDayOfMonth();
+            String dateForTimeKeeping = day + "/" + month + "/" + year;
 
             String dateString = day + "/" + month + "/" + year;
             // Lấy giờ và phút hiện tại
@@ -150,6 +167,7 @@ public class StaffHomeFragment extends Fragment {
             String qrcode = dateString + userId;
             String encodedString = Base64.encodeToString(qrcode.getBytes(), Base64.DEFAULT);
             firebaseDatabase.getReference().child("QRCode").child("codescan").setValue(encodedString);
+            addDataTimeKeeping();
         }else if(shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
             Toast.makeText(context, "Camera permission required", Toast.LENGTH_SHORT).show();
         }else {
@@ -172,4 +190,76 @@ public class StaffHomeFragment extends Fragment {
 //            super.onActivityResult(requestCode, resultCode, data);
 //        }
 //    }
+
+    public void addDataTimeKeeping() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        String userId = user.getUid();
+        if (user != null) {
+            firebaseDatabase.getReference().addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    LocalDateTime now = LocalDateTime.now();
+                    int year = now.getYear();
+                    int month = now.getMonthValue();
+                    int day = now.getDayOfMonth();
+                    int hour = now.getHour();
+                    int minute = now.getMinute();
+
+                    String dateForTimeKeeping = day + " " + month + " " + year + " " + hour + ":" + minute;
+
+                    DatabaseReference userReference = firebaseDatabase.getReference("User").child(userId).child("timekeeping");
+
+                    userReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            String id = dateForTimeKeeping; // Tạo id mới
+                            DatabaseReference newTimekeepingRef = userReference.child(dateForTimeKeeping);
+
+                            if (!snapshot.child(dateForTimeKeeping).exists()) {
+                                String checkIn = "08:00"; // Giờ check in mặc định
+                                String checkOut = ""; // Không có giờ check out khi mới thêm
+
+                                Map<String, Object> timekeepingData = new HashMap<>();
+                                timekeepingData.put("id", id);
+                                timekeepingData.put("checkIn", checkIn);
+                                timekeepingData.put("checkOut", checkOut);
+
+                                newTimekeepingRef.setValue(timekeepingData).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if (task.isSuccessful()) {
+                                            Log.d(TAG, "Data added successfully");
+                                        } else {
+                                            Log.d(TAG, "Failed to add data");
+                                        }
+                                    }
+                                });
+                            } else {
+                                Log.d(TAG, "Data already exists for today");
+                                Toast.makeText(getContext(), "Data already exists for today", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+        } else {
+            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
+
+
+
 }

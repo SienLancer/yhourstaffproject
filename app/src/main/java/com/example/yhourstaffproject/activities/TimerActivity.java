@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,7 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -27,13 +29,18 @@ import com.example.yhourstaffproject.R;
 import com.example.yhourstaffproject.fragments.StaffHomeFragment;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -44,6 +51,8 @@ public class TimerActivity extends AppCompatActivity {
     private boolean hasCheckedOut = false;
     private Button checkoutButton;
     private Calendar currentTime;
+    FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+    FirebaseAuth mAuth = FirebaseAuth.getInstance();
     private static final String PREFS_NAME = "MyPrefsFile";
 
 
@@ -79,22 +88,76 @@ public class TimerActivity extends AppCompatActivity {
             }
         });
 
-        displayCurrentTime();
+        getDataTimeKeeping();
     }
 
-    private void displayCurrentTime() {
-        int year = currentTime.get(Calendar.YEAR);
-        int month = currentTime.get(Calendar.MONTH) + 1; // Tháng bắt đầu từ 0
-        int day = currentTime.get(Calendar.DAY_OF_MONTH);
-        int hour = currentTime.get(Calendar.HOUR_OF_DAY);
-        int minute = currentTime.get(Calendar.MINUTE);
-        int second = currentTime.get(Calendar.SECOND);
+    public void getDataTimeKeeping() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        String userId = user.getUid();
+        if (user != null) {
+            firebaseDatabase.getReference().addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    LocalDateTime now = LocalDateTime.now();
+                    int year = now.getYear();
+                    int month = now.getMonthValue();
+                    int day = now.getDayOfMonth();
+                    int hour = now.getHour();
+                    int minute = now.getMinute();
 
-        // Hiển thị thông tin về thời gian lên giao diện người dùng
-        String currentTimeString = String.format(Locale.getDefault(), "%02d/%02d/%d %02d:%02d:%02d", day, month, year, hour, minute, second);
-        timerTextView.setText(currentTimeString);
+                    String dateForTimeKeeping = day + " " + month + " " + year + " " + hour + ":" + minute;
 
+                    DatabaseReference userReference = firebaseDatabase.getReference("User").child(userId).child("timekeeping");
+
+                    userReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            // Check if data exists for today
+                            if (snapshot.child(dateForTimeKeeping).exists()) {
+                                // Data exists, you can retrieve it here
+                                String checkInTime = snapshot.child(dateForTimeKeeping).child("id").getValue(String.class);
+                                // Assuming you have a TextView named textViewCheckInTime
+                                timerTextView.setText(checkInTime);
+
+                            } else {
+                                // Data doesn't exist for today
+                                //Log.d(TAG, "Data doesn't exist for today");
+                                Toast.makeText(TimerActivity.this, "Data doesn't exist for today", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            Toast.makeText(TimerActivity.this, "Error", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Toast.makeText(TimerActivity.this, "Error", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+        } else {
+            Toast.makeText(TimerActivity.this, "User not logged in", Toast.LENGTH_SHORT).show();
+        }
     }
+
+
+//    private void displayCurrentTime() {
+//        int year = currentTime.get(Calendar.YEAR);
+//        int month = currentTime.get(Calendar.MONTH) + 1; // Tháng bắt đầu từ 0
+//        int day = currentTime.get(Calendar.DAY_OF_MONTH);
+//        int hour = currentTime.get(Calendar.HOUR_OF_DAY);
+//        int minute = currentTime.get(Calendar.MINUTE);
+//        int second = currentTime.get(Calendar.SECOND);
+//
+//        // Hiển thị thông tin về thời gian lên giao diện người dùng
+//        String currentTimeString = String.format(Locale.getDefault(), "%02d/%02d/%d %02d:%02d:%02d", day, month, year, hour, minute, second);
+//        timerTextView.setText(currentTimeString);
+//
+//    }
 
 //    private void startTimer() {
 //        countUpTimer = new CountDownTimer(Long.MAX_VALUE, 1000) {
