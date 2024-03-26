@@ -28,6 +28,8 @@ import androidx.fragment.app.Fragment;
 
 import com.example.yhourstaffproject.R;
 import com.example.yhourstaffproject.fragments.StaffHomeFragment;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -45,7 +47,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 public class TimerActivity extends AppCompatActivity {
 
@@ -156,13 +160,6 @@ public class TimerActivity extends AppCompatActivity {
 
 
 
-    private void stopTimer() {
-//        countUpTimer.cancel();
-        hasCheckedOut = true;
-        Intent intent = new Intent(this, StaffHomeFragment.class);
-        startActivity(intent);
-    }
-
 
 
     private void showCamera() {
@@ -181,7 +178,7 @@ public class TimerActivity extends AppCompatActivity {
         // Lấy thời gian hiện tại từ timerTextView
         Calendar checkoutTime = Calendar.getInstance();
         String timerText = timerTextView.getText().toString();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
         try {
             Date parsedDate = dateFormat.parse(timerText);
             checkoutTime.setTime(parsedDate);
@@ -203,8 +200,80 @@ public class TimerActivity extends AppCompatActivity {
         Toast.makeText(this, String.format(Locale.getDefault(), "Total cost: %.0f VND", totalCost), Toast.LENGTH_SHORT).show();
 
         // Dừng đồng hồ và thực hiện các hành động khác (nếu cần)
-        stopTimer();
+        setDataForCheckout();
         // Navigate to checkout page or perform checkout-related actions
     }
+
+    public void setDataForCheckout() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        String userId = user.getUid();
+        if (user != null) {
+            DatabaseReference userReference = firebaseDatabase.getReference("User").
+                    child(userId).child("timekeeping");
+
+            // Đặt dữ liệu cho checkout
+            LocalDateTime now = LocalDateTime.now();
+            int year = now.getYear();
+            int month = now.getMonthValue();
+            int day = now.getDayOfMonth();
+            int hour = now.getHour();
+            int minute = now.getMinute();
+            String minuteFormatted = String.format("%02d", minute);
+
+            String checkoutTime = day + "/" + month + "/" + year + " " + hour + ":" + minuteFormatted;
+
+            // Tạo một đối tượng chứa dữ liệu để đẩy lên Firebase
+            Map<String, Object> checkoutData = new HashMap<>();
+            checkoutData.put("checkOut", checkoutTime);
+
+            // Thực hiện truy vấn để lấy mục cuối cùng
+            Query query = userReference.orderByChild("timestamp").limitToLast(1);
+
+            query.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        // Lặp qua kết quả (thoả mãn chỉ có 1 mục) để cập nhật dữ liệu checkout
+                        for (DataSnapshot childSnapshot : snapshot.getChildren()) {
+                            String lastKey = childSnapshot.getKey();
+
+                            // Thêm dữ liệu checkout vào mục cuối cùng
+                            userReference.child(lastKey).updateChildren(checkoutData)
+                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+                                            // Thành công
+                                            //hasCheckedOut = true;
+                                            Intent intent = new Intent(TimerActivity.this, StaffHomeFragment.class);
+                                            startActivity(intent);
+                                            Toast.makeText(TimerActivity.this, "Checkout data set successfully", Toast.LENGTH_SHORT).show();
+                                        }
+                                    })
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            // Lỗi xảy ra
+                                            Toast.makeText(TimerActivity.this, "Failed to set checkout data", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                        }
+                    } else {
+                        // Không tìm thấy dữ liệu
+                        Toast.makeText(TimerActivity.this, "No data found", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    // Lỗi xảy ra
+                    Toast.makeText(TimerActivity.this, "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+
+        } else {
+            Toast.makeText(TimerActivity.this, "User not logged in", Toast.LENGTH_SHORT).show();
+        }
+    }
+
 
 }
