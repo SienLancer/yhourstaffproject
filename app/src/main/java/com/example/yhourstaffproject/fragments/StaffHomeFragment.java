@@ -68,8 +68,8 @@ public class StaffHomeFragment extends Fragment {
         timer_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                Intent intent = new Intent(getActivity(), TimerActivity.class);
-//                startActivity(intent);
+                Intent intent = new Intent(getActivity(), TimerActivity.class);
+                startActivity(intent);
                 //addDataTimeKeeping();
             }
         });
@@ -194,6 +194,7 @@ public class StaffHomeFragment extends Fragment {
     public void addDataTimeKeeping() {
         FirebaseUser user = mAuth.getCurrentUser();
         String userId = user.getUid();
+        long timestamp = System.currentTimeMillis();
         if (user != null) {
             firebaseDatabase.getReference().addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
@@ -204,19 +205,21 @@ public class StaffHomeFragment extends Fragment {
                     int day = now.getDayOfMonth();
                     int hour = now.getHour();
                     int minute = now.getMinute();
+                    String minuteFormatted = String.format("%02d", minute);
 
-                    String dateForTimeKeeping = day + " " + month + " " + year + " " + hour + ":" + minute;
+                    String dateForTimeKeeping = day + " " + month + " " + year + " " + hour + ":" + minuteFormatted;
+                    String dateForCheckIn = day + "/" + month + "/" + year + " " + hour + ":" + minuteFormatted;
 
                     DatabaseReference userReference = firebaseDatabase.getReference("User").child(userId).child("timekeeping");
 
                     userReference.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            String id = dateForTimeKeeping; // Tạo id mới
-                            DatabaseReference newTimekeepingRef = userReference.child(dateForTimeKeeping);
+                            String id = timestamp + dateForTimeKeeping; // Tạo id mới
+                            DatabaseReference newTimekeepingRef = userReference.child(id);
 
-                            if (!snapshot.child(dateForTimeKeeping).exists()) {
-                                String checkIn = "08:00"; // Giờ check in mặc định
+                            if (!snapshot.child(id).exists()) {
+                                String checkIn = dateForCheckIn; // Giờ check in mặc định
                                 String checkOut = ""; // Không có giờ check out khi mới thêm
 
                                 Map<String, Object> timekeepingData = new HashMap<>();

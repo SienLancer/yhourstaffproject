@@ -33,6 +33,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
@@ -95,42 +96,24 @@ public class TimerActivity extends AppCompatActivity {
         FirebaseUser user = mAuth.getCurrentUser();
         String userId = user.getUid();
         if (user != null) {
-            firebaseDatabase.getReference().addListenerForSingleValueEvent(new ValueEventListener() {
+            DatabaseReference userReference = firebaseDatabase.getReference("User").child(userId).child("timekeeping");
+
+            // Sắp xếp theo thời gian giảm dần và giới hạn kết quả chỉ lấy 1 mục cuối cùng
+            Query query = userReference.orderByChild("timestamp").limitToLast(1);
+
+            query.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    LocalDateTime now = LocalDateTime.now();
-                    int year = now.getYear();
-                    int month = now.getMonthValue();
-                    int day = now.getDayOfMonth();
-                    int hour = now.getHour();
-                    int minute = now.getMinute();
-
-                    String dateForTimeKeeping = day + " " + month + " " + year + " " + hour + ":" + minute;
-
-                    DatabaseReference userReference = firebaseDatabase.getReference("User").child(userId).child("timekeeping");
-
-                    userReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            // Check if data exists for today
-                            if (snapshot.child(dateForTimeKeeping).exists()) {
-                                // Data exists, you can retrieve it here
-                                String checkInTime = snapshot.child(dateForTimeKeeping).child("id").getValue(String.class);
-                                // Assuming you have a TextView named textViewCheckInTime
-                                timerTextView.setText(checkInTime);
-
-                            } else {
-                                // Data doesn't exist for today
-                                //Log.d(TAG, "Data doesn't exist for today");
-                                Toast.makeText(TimerActivity.this, "Data doesn't exist for today", Toast.LENGTH_SHORT).show();
-                            }
+                    if (snapshot.exists()) {
+                        // Lặp qua kết quả (thoả mãn chỉ có 1 mục) để lấy dữ liệu
+                        for (DataSnapshot childSnapshot : snapshot.getChildren()) {
+                            String checkInTime = childSnapshot.child("checkIn").getValue(String.class);
+                            // Hiển thị dữ liệu
+                            timerTextView.setText(checkInTime);
                         }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-                            Toast.makeText(TimerActivity.this, "Error", Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                    } else {
+                        Toast.makeText(TimerActivity.this, "Data doesn't exist", Toast.LENGTH_SHORT).show();
+                    }
                 }
 
                 @Override
@@ -145,43 +128,17 @@ public class TimerActivity extends AppCompatActivity {
     }
 
 
-//    private void displayCurrentTime() {
-//        int year = currentTime.get(Calendar.YEAR);
-//        int month = currentTime.get(Calendar.MONTH) + 1; // Tháng bắt đầu từ 0
-//        int day = currentTime.get(Calendar.DAY_OF_MONTH);
-//        int hour = currentTime.get(Calendar.HOUR_OF_DAY);
-//        int minute = currentTime.get(Calendar.MINUTE);
-//        int second = currentTime.get(Calendar.SECOND);
-//
-//        // Hiển thị thông tin về thời gian lên giao diện người dùng
-//        String currentTimeString = String.format(Locale.getDefault(), "%02d/%02d/%d %02d:%02d:%02d", day, month, year, hour, minute, second);
-//        timerTextView.setText(currentTimeString);
-//
-//    }
 
-//    private void startTimer() {
-//        countUpTimer = new CountDownTimer(Long.MAX_VALUE, 1000) {
-//            @Override
-//            public void onTick(long millisUntilFinished) {
-//                timeElapsedInMillis += 1000;
-//                updateCountdownText();
-//            }
-//
-//            @Override
-//            public void onFinish() {
-//                // Not used in count up timer
-//            }
-//        }.start();
+
+//    @Override
+//    public void onBackPressed() {
+//        if (!hasCheckedOut) {
+//            // Nếu chưa thực hiện checkout, không cho phép quay lại
+//            Toast.makeText(this, "Please checkout before leaving", Toast.LENGTH_SHORT).show();
+//        } else {
+//            super.onBackPressed();
+//        }
 //    }
-    @Override
-    public void onBackPressed() {
-        if (!hasCheckedOut) {
-            // Nếu chưa thực hiện checkout, không cho phép quay lại
-            Toast.makeText(this, "Please checkout before leaving", Toast.LENGTH_SHORT).show();
-        } else {
-            super.onBackPressed();
-        }
-    }
 
 
 
@@ -193,14 +150,7 @@ public class TimerActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    private void updateCountdownText() {
-        int hours = (int) (timeElapsedInMillis / 1000) / 3600;
-        int minutes = (int) ((timeElapsedInMillis / 1000) % 3600) / 60;
-        int seconds = (int) (timeElapsedInMillis / 1000) % 60;
 
-        String timeElapsedFormatted = String.format(Locale.getDefault(), "%02d:%02d:%02d", hours, minutes, seconds);
-        timerTextView.setText(timeElapsedFormatted);
-    }
 
     private void showCamera() {
         ScanOptions options = new ScanOptions();
