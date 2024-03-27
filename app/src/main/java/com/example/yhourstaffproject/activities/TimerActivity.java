@@ -184,33 +184,28 @@ public class TimerActivity extends AppCompatActivity {
     }
 
     private void handleQRCodeResult(String contents) {
-        // Lấy thời gian hiện tại từ timerTextView
-        Calendar checkoutTime = Calendar.getInstance();
-        String timerText = timerTextView.getText().toString();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
-        try {
-            Date parsedDate = dateFormat.parse(timerText);
-            checkoutTime.setTime(parsedDate);
-        } catch (ParseException e) {
-            e.printStackTrace();
-            return;
-        }
+        firebaseDatabase.getReference().child("QRCode").child("codescan")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        String realtimeqr = snapshot.getValue(String.class);
+                        if (contents.equals(realtimeqr)){
+                            Toast.makeText(TimerActivity.this, "Check out successful!", Toast.LENGTH_SHORT).show();
+                            setDataForCheckout();
+                            totalCost();
+                            startActivity(new Intent(TimerActivity.this, BottomTabActivity.class));
+                        }else {
+                            Toast.makeText(TimerActivity.this, "Scan failed!", Toast.LENGTH_SHORT).show();
+                        }
 
-        // Tính toán thời gian giữa checkoutTime và thời gian đã set trước đó
-        long timeDifferenceInMillis = checkoutTime.getTimeInMillis() - currentTime.getTimeInMillis();
+                    }
 
-        // Chuyển đổi thời gian từ millis thành giờ
-        double totalHours = timeDifferenceInMillis / (1000.0 * 3600);
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
 
-        // Tính số tiền tương ứng
-        double totalCost = Math.abs(totalHours) * 15000; // Sử dụng giá trị tuyệt đối của totalHours
+                    }
+                });
 
-        // Hiển thị số tiền lên giao diện người dùng
-        Toast.makeText(this, String.format(Locale.getDefault(), "Total cost: %.0f VND", totalCost), Toast.LENGTH_SHORT).show();
-
-        // Dừng đồng hồ và thực hiện các hành động khác (nếu cần)
-        setDataForCheckout();
-        // Navigate to checkout page or perform checkout-related actions
     }
 
     public void setDataForCheckout() {
@@ -253,8 +248,7 @@ public class TimerActivity extends AppCompatActivity {
                                         public void onSuccess(Void aVoid) {
                                             // Thành công
                                             //hasCheckedOut = true;
-                                            Intent intent = new Intent(TimerActivity.this, StaffHomeFragment.class);
-                                            startActivity(intent);
+
                                             Toast.makeText(TimerActivity.this, "Checkout data set successfully", Toast.LENGTH_SHORT).show();
                                         }
                                     })
@@ -317,6 +311,33 @@ public class TimerActivity extends AppCompatActivity {
         }else {
             requestPermissionLauncher.launch(Manifest.permission.CAMERA);
         }
+
+
+    }
+
+    public void totalCost() {
+        Calendar checkoutTime = Calendar.getInstance();
+        String timerText = timerTextView.getText().toString();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+        try {
+            Date parsedDate = dateFormat.parse(timerText);
+            checkoutTime.setTime(parsedDate);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        // Tính toán thời gian giữa checkoutTime và thời gian đã set trước đó
+        long timeDifferenceInMillis = checkoutTime.getTimeInMillis() - currentTime.getTimeInMillis();
+
+        // Chuyển đổi thời gian từ millis thành giờ
+        double totalHours = timeDifferenceInMillis / (1000.0 * 3600);
+
+        // Tính số tiền tương ứng
+        double totalCost = Math.abs(totalHours) * 15000; // Sử dụng giá trị tuyệt đối của totalHours
+
+        // Hiển thị số tiền lên giao diện người dùng
+        Toast.makeText(TimerActivity.this, String.format(Locale.getDefault(), "Total cost: %.0f VND", totalCost), Toast.LENGTH_SHORT).show();
     }
 
 
