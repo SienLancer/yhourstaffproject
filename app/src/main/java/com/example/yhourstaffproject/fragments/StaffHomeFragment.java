@@ -6,6 +6,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Base64;
@@ -36,6 +37,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.common.BitMatrix;
+import com.journeyapps.barcodescanner.BarcodeEncoder;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
 
@@ -106,9 +111,28 @@ public class StaffHomeFragment extends Fragment {
     });
 
     private void setResult(String contents) {
-        addDataTimeKeeping();
-        Toast.makeText(getContext(), "Timekeeping successful!", Toast.LENGTH_SHORT).show();
-        startActivity(new Intent(getActivity(), TimerActivity.class));
+        firebaseDatabase.getReference().child("QRCode").child("codescan")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        String realtimeqr = snapshot.getValue(String.class);
+                        if (contents.equals(realtimeqr)){
+                            Toast.makeText(getContext(), "Scan successful!", Toast.LENGTH_SHORT).show();
+                            addDataTimeKeeping();
+                            startActivity(new Intent(getActivity(), TimerActivity.class));
+                        }else {
+                            Toast.makeText(getContext(), "Scan failed!", Toast.LENGTH_SHORT).show();
+                        }
+
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
+
     }
 
     private void showCamera() {
