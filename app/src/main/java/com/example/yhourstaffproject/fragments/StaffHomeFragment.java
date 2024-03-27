@@ -51,17 +51,12 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link StaffHomeFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+
 public class StaffHomeFragment extends Fragment {
     private View mView;
     ImageButton scanQr_imgBtn;
     Button timer_btn;
-    private Calendar currentTime;
-    ValueEventListener valueEventListener;
+
     TextView scan_txt;
     FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
@@ -203,21 +198,6 @@ public class StaffHomeFragment extends Fragment {
         }
     }
 
-//    @Override
-//    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-//
-//        IntentResult intentResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-//        if (intentResult != null){
-//            String a = intentResult.getContents();
-//            if (a == null){
-//                content.setText("null");
-//            }else {
-//                content.setText("not null");
-//            }
-//        }else {
-//            super.onActivityResult(requestCode, resultCode, data);
-//        }
-//    }
 
     public void addDataTimeKeeping() {
         FirebaseUser user = mAuth.getCurrentUser();
@@ -313,8 +293,12 @@ public class StaffHomeFragment extends Fragment {
                         // Cập nhật giao diện dựa trên tồn tại của checkout
                         if (checkoutExists) {
                             timer_btn.setVisibility(View.GONE);
+                            scanQr_imgBtn.setVisibility(View.VISIBLE);
+                            scan_txt.setText("Scan QR");
                         } else {
                             timer_btn.setVisibility(View.VISIBLE);
+                            scanQr_imgBtn.setVisibility(View.GONE);
+                            scan_txt.setText("On shift");
                         }
                     } else {
                         // Không có dữ liệu, hiển thị nút Timer

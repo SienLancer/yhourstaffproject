@@ -37,15 +37,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView7" />
 
-        <Button
-            android:id="@+id/timer_btn"
-            android:layout_width="100dp"
-            android:layout_height="50dp"
-            android:layout_marginEnd="30dp"
-            android:text="Timer"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout
@@ -127,29 +118,48 @@
             app:layout_constraintTop_toTopOf="@+id/imageView3" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <ImageButton
-        android:id="@+id/scanQr_imgBtn"
-        android:layout_marginTop="30dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@color/white"
-        android:layout_gravity="center"
-        app:srcCompat="@drawable/scanbtn" />
-
-    <TextView
-        android:id="@+id/scan_txt"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="Scan"
-        android:textColor="@color/black"
-        android:textSize="16sp" />
-    <TextView
-        android:id="@+id/text"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:textColor="@color/black"
-        android:textSize="36sp" />
+        android:layout_height="wrap_content">
+
+        <ImageButton
+            android:id="@+id/scanQr_imgBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/scanbtn" />
+
+        <Button
+            android:id="@+id/timer_btn"
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:text="Timer"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:layout_editor_absoluteY="20dp" />
+
+        <TextView
+            android:id="@+id/scan_txt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Scan"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            tools:layout_editor_absoluteX="188dp"
+            android:layout_marginTop="20dp"
+            app:layout_constraintTop_toBottomOf="@id/scanQr_imgBtn"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:layout_editor_absoluteY="91dp" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </LinearLayout>
