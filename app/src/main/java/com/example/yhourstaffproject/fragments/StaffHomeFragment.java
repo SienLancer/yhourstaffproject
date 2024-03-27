@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,6 +27,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.yhourstaffproject.R;
+import com.example.yhourstaffproject.activities.SalaryActivity;
 import com.example.yhourstaffproject.activities.TimerActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -56,7 +58,7 @@ public class StaffHomeFragment extends Fragment {
     private View mView;
     ImageButton scanQr_imgBtn;
     Button timer_btn;
-
+    ImageView total_salary_imgv;
     TextView scan_txt;
     FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
@@ -67,6 +69,7 @@ public class StaffHomeFragment extends Fragment {
         scanQr_imgBtn = mView.findViewById(R.id.scanQr_imgBtn);
         scan_txt = mView.findViewById(R.id.scan_txt);
         timer_btn = mView.findViewById(R.id.timer_btn);
+        total_salary_imgv = mView.findViewById(R.id.total_salary_imgv);
         setupTimerButtonVisibilityListener();
 
         timer_btn.setOnClickListener(new View.OnClickListener() {
@@ -83,6 +86,14 @@ public class StaffHomeFragment extends Fragment {
             public void onClick(View view) {
                 checkPermissionAndShowActivity(getContext());
 
+            }
+        });
+
+        total_salary_imgv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+            Intent intent = new Intent(getActivity(), SalaryActivity.class);
+            startActivity(intent);
             }
         });
 

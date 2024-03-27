@@ -94,7 +94,7 @@
         android:layout_marginTop="10dp">
 
         <ImageView
-            android:id="@+id/imageView3"
+            android:id="@+id/total_salary_imgv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -111,11 +111,11 @@
             android:textColor="#FFFFFF"
             android:textSize="26sp"
             android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="@+id/imageView3"
-            app:layout_constraintEnd_toEndOf="@+id/imageView3"
+            app:layout_constraintBottom_toBottomOf="@+id/total_salary_imgv"
+            app:layout_constraintEnd_toEndOf="@+id/total_salary_imgv"
             app:layout_constraintHorizontal_bias="0.114"
-            app:layout_constraintStart_toStartOf="@+id/imageView3"
-            app:layout_constraintTop_toTopOf="@+id/imageView3" />
+            app:layout_constraintStart_toStartOf="@+id/total_salary_imgv"
+            app:layout_constraintTop_toTopOf="@+id/total_salary_imgv" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
