@@ -28,8 +28,10 @@ import androidx.fragment.app.Fragment;
 
 import com.example.yhourstaffproject.R;
 import com.example.yhourstaffproject.fragments.StaffHomeFragment;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -61,10 +63,6 @@ public class TimerActivity extends AppCompatActivity {
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
     private static final String PREFS_NAME = "MyPrefsFile";
 
-
-
-    private CountDownTimer countUpTimer;
-    private long timeElapsedInMillis;
 
     private ActivityResultLauncher<ScanOptions> qrCodeLauncher;
     private ActivityResultLauncher<String> requestPermissionLauncher;
@@ -184,27 +182,50 @@ public class TimerActivity extends AppCompatActivity {
     }
 
     private void handleQRCodeResult(String contents) {
-        firebaseDatabase.getReference().child("QRCode").child("codescan")
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        String realtimeqr = snapshot.getValue(String.class);
-                        if (contents.equals(realtimeqr)){
-                            Toast.makeText(TimerActivity.this, "Check out successful!", Toast.LENGTH_SHORT).show();
-                            setDataForCheckout();
-                            totalCost();
-                            startActivity(new Intent(TimerActivity.this, BottomTabActivity.class));
-                        }else {
-                            Toast.makeText(TimerActivity.this, "Scan failed!", Toast.LENGTH_SHORT).show();
-                        }
+        FirebaseUser user = mAuth.getCurrentUser();
+        String userId = user.getUid();
+        if (user != null) {
+            firebaseDatabase.getReference().addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    String ownerShopId = snapshot.child("User").child(userId).child("shopID").getValue(String.class);
+                    if(ownerShopId != null){
+                        firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("QRCode").child("codeScan")
+                                .addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                        String realtimeqr = snapshot.getValue(String.class);
+                                        if (contents.equals(realtimeqr)){
+                                            Toast.makeText(TimerActivity.this, "Check out successful!", Toast.LENGTH_SHORT).show();
+                                            setDataForCheckout();
+                                            totalCost();
+                                            startActivity(new Intent(TimerActivity.this, BottomTabActivity.class));
+                                        }else {
+                                            Toast.makeText(TimerActivity.this, "Scan failed!", Toast.LENGTH_SHORT).show();
+                                        }
 
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                    }
+                                });
                     }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
+                    else {
+                        Toast.makeText(TimerActivity.this, "Shop not found", Toast.LENGTH_SHORT).show();
                     }
-                });
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Toast.makeText(TimerActivity.this, "Error", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }else {
+            Toast.makeText(TimerActivity.this, "User not logged in", Toast.LENGTH_SHORT).show();
+        }
+
 
     }
 
@@ -284,28 +305,8 @@ public class TimerActivity extends AppCompatActivity {
                 Manifest.permission.CAMERA
         )== PackageManager.PERMISSION_GRANTED){
             showCamera();
-            LocalDate today = LocalDate.now();
+            setDataQrCode();
 
-            int year = today.getYear();
-            int month = today.getMonthValue();
-            int day = today.getDayOfMonth();
-            String dateForTimeKeeping = day + "/" + month + "/" + year;
-
-            String dateString = day + "/" + month + "/" + year;
-            // Lấy giờ và phút hiện tại
-            Calendar currentTime = Calendar.getInstance();
-            int hour = currentTime.get(Calendar.HOUR_OF_DAY);
-            int minute = currentTime.get(Calendar.MINUTE);
-
-            // Thêm giờ và phút vào chuỗi dateString
-            dateString += " " + hour + ":" + minute;
-
-            FirebaseUser user = mAuth.getCurrentUser();
-            String userId = user.getUid();
-            String qrcode = dateString + userId;
-            String encodedString = Base64.encodeToString(qrcode.getBytes(), Base64.DEFAULT);
-            firebaseDatabase.getReference().child("QRCode").child("codescan").setValue(encodedString);
-            //addDataTimeKeeping();
         }else if(shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
             Toast.makeText(context, "Camera permission required", Toast.LENGTH_SHORT).show();
         }else {
@@ -338,6 +339,63 @@ public class TimerActivity extends AppCompatActivity {
 
         // Hiển thị số tiền lên giao diện người dùng
         Toast.makeText(TimerActivity.this, String.format(Locale.getDefault(), "Total cost: %.0f VND", totalCost), Toast.LENGTH_SHORT).show();
+    }
+
+    public void setDataQrCode(){
+
+        FirebaseUser user = mAuth.getCurrentUser();
+        String userId = user.getUid();
+        if (user != null) {
+            firebaseDatabase.getReference().addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    String ownerShopId = snapshot.child("User").child(userId).child("shopID").getValue(String.class);
+                    if(ownerShopId != null){
+                        DatabaseReference shopRef = firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("QRCode").child("codeScan");
+                        // Thực hiện thay đổi dữ liệu
+                        LocalDate today = LocalDate.now();
+
+                        int year = today.getYear();
+                        int month = today.getMonthValue();
+                        int day = today.getDayOfMonth();
+                        String dateForTimeKeeping = day + "/" + month + "/" + year;
+
+                        String dateString = day + "/" + month + "/" + year;
+                        // Lấy giờ và phút hiện tại
+                        Calendar currentTime = Calendar.getInstance();
+                        int hour = currentTime.get(Calendar.HOUR_OF_DAY);
+                        int minute = currentTime.get(Calendar.MINUTE);
+
+                        // Thêm giờ và phút vào chuỗi dateString
+                        dateString += " " + hour + ":" + minute;
+
+
+                        String qrcode = dateString + userId;
+                        String encodedString = Base64.encodeToString(qrcode.getBytes(), Base64.DEFAULT);
+                        shopRef.setValue(encodedString).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful()) {
+                                    Toast.makeText(TimerActivity.this, "QR Code updated successfully", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(TimerActivity.this, "Failed to update QR Code", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+                    } else {
+                        Toast.makeText(TimerActivity.this, "Shop not found", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Toast.makeText(TimerActivity.this, "Error", Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            Toast.makeText(TimerActivity.this, "User not logged in", Toast.LENGTH_SHORT).show();
+        }
+
     }
 
 

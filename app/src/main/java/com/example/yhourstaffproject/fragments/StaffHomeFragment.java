@@ -111,28 +111,49 @@ public class StaffHomeFragment extends Fragment {
     });
 
     private void setResult(String contents) {
-        firebaseDatabase.getReference().child("QRCode").child("codescan")
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        String realtimeqr = snapshot.getValue(String.class);
-                        if (contents.equals(realtimeqr)){
-                            Toast.makeText(getContext(), "Scan successful!", Toast.LENGTH_SHORT).show();
-                            addDataTimeKeeping();
-                            startActivity(new Intent(getActivity(), TimerActivity.class));
-                        }else {
-                            Toast.makeText(getContext(), "Scan failed!", Toast.LENGTH_SHORT).show();
-                        }
+        FirebaseUser user = mAuth.getCurrentUser();
+        String userId = user.getUid();
+        if (user != null) {
+            firebaseDatabase.getReference().addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    String ownerShopId = snapshot.child("User").child(userId).child("shopID").getValue(String.class);
+                    if(ownerShopId != null){
+                        firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("QRCode").child("codeScan")
+                                .addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                        String realtimeqr = snapshot.getValue(String.class);
+                                        if (contents.equals(realtimeqr)){
+                                            Toast.makeText(getContext(), "Scan successful!", Toast.LENGTH_SHORT).show();
+                                            addDataTimeKeeping();
+                                            startActivity(new Intent(getActivity(), TimerActivity.class));
 
+                                        }else {
+                                            Toast.makeText(getContext(), "Scan failed!", Toast.LENGTH_SHORT).show();
+                                        }
+
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                    }
+                                });
                     }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
+                    else {
+                        Toast.makeText(getContext(), "Shop not found", Toast.LENGTH_SHORT).show();
                     }
-                });
+                }
 
-
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }else {
+            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void showCamera() {
@@ -174,28 +195,7 @@ public class StaffHomeFragment extends Fragment {
                 Manifest.permission.CAMERA
         )== PackageManager.PERMISSION_GRANTED){
             showCamera();
-            LocalDate today = LocalDate.now();
-
-            int year = today.getYear();
-            int month = today.getMonthValue();
-            int day = today.getDayOfMonth();
-            String dateForTimeKeeping = day + "/" + month + "/" + year;
-
-            String dateString = day + "/" + month + "/" + year;
-            // Lấy giờ và phút hiện tại
-            Calendar currentTime = Calendar.getInstance();
-            int hour = currentTime.get(Calendar.HOUR_OF_DAY);
-            int minute = currentTime.get(Calendar.MINUTE);
-
-            // Thêm giờ và phút vào chuỗi dateString
-            dateString += " " + hour + ":" + minute;
-
-            FirebaseUser user = mAuth.getCurrentUser();
-            String userId = user.getUid();
-            String qrcode = dateString + userId;
-            String encodedString = Base64.encodeToString(qrcode.getBytes(), Base64.DEFAULT);
-            firebaseDatabase.getReference().child("QRCode").child("codescan").setValue(encodedString);
-            //addDataTimeKeeping();
+            setDataQrCode();
         }else if(shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
             Toast.makeText(context, "Camera permission required", Toast.LENGTH_SHORT).show();
         }else {
@@ -345,6 +345,62 @@ public class StaffHomeFragment extends Fragment {
         }
     }
 
+    public void setDataQrCode(){
+
+        FirebaseUser user = mAuth.getCurrentUser();
+        String userId = user.getUid();
+        if (user != null) {
+            firebaseDatabase.getReference().addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    String ownerShopId = snapshot.child("User").child(userId).child("shopID").getValue(String.class);
+                    if(ownerShopId != null){
+                        DatabaseReference shopRef = firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("QRCode").child("codeScan");
+                        // Thực hiện thay đổi dữ liệu
+                        LocalDate today = LocalDate.now();
+
+                        int year = today.getYear();
+                        int month = today.getMonthValue();
+                        int day = today.getDayOfMonth();
+                        String dateForTimeKeeping = day + "/" + month + "/" + year;
+
+                        String dateString = day + "/" + month + "/" + year;
+                        // Lấy giờ và phút hiện tại
+                        Calendar currentTime = Calendar.getInstance();
+                        int hour = currentTime.get(Calendar.HOUR_OF_DAY);
+                        int minute = currentTime.get(Calendar.MINUTE);
+
+                        // Thêm giờ và phút vào chuỗi dateString
+                        dateString += " " + hour + ":" + minute;
+
+
+                        String qrcode = dateString + userId;
+                        String encodedString = Base64.encodeToString(qrcode.getBytes(), Base64.DEFAULT);
+                        shopRef.setValue(encodedString).addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful()) {
+                                    Toast.makeText(getContext(), "QR Code updated successfully", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    Toast.makeText(getContext(), "Failed to update QR Code", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+                    } else {
+                        Toast.makeText(getContext(), "Shop not found", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+        }
+
+    }
 
 
 
