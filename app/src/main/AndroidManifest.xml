@@ -25,6 +25,12 @@
             android:name=".activities.SalaryActivity"
             android:exported="false" />
         <activity
+            android:name=".activities.WeekDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.WeekListActivity"
+            android:exported="false" />
+        <activity
             android:name=".activities.TimerActivity"
             android:exported="false" />
         <activity

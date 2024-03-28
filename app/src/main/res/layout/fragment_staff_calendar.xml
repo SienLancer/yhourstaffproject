@@ -18,4 +18,10 @@
         android:layout_height="wrap_content"
         android:text="View Time Table" />
 
+    <Button
+        android:id="@+id/list_timetable_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="List Time Table" />
+
 </LinearLayout>

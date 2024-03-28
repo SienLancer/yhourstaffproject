@@ -1,25 +1,18 @@
 package com.example.yhourstaffproject.fragments;
 
-import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import com.example.yhourstaffproject.R;
 import com.example.yhourstaffproject.activities.CalendarActivity;
+import com.example.yhourstaffproject.activities.WeekListActivity;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
@@ -30,7 +23,7 @@ import com.google.firebase.database.ValueEventListener;
  */
 public class StaffCalendarFragment extends Fragment {
     private View mView;
-    Button view_timetable_btn;
+    Button view_timetable_btn, list_timetable_btn;
 
     FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
@@ -61,6 +54,15 @@ public class StaffCalendarFragment extends Fragment {
                              Bundle savedInstanceState) {
         mView = inflater.inflate(R.layout.fragment_staff_calendar, container, false);
         view_timetable_btn = mView.findViewById(R.id.view_timetable_btn);
+        list_timetable_btn = mView.findViewById(R.id.list_timetable_btn);
+
+        list_timetable_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), WeekListActivity.class);
+                startActivity(intent);
+            }
+        });
 
         view_timetable_btn.setOnClickListener(new View.OnClickListener() {
             @Override
