@@ -19,6 +19,9 @@
         android:theme="@style/Theme.FinalProject"
         tools:targetApi="31">
         <activity
+            android:name=".activities.SalaryListActivity"
+            android:exported="false" />
+        <activity
             android:name=".activities.SalaryActivity"
             android:exported="false" />
         <activity

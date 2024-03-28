@@ -2,6 +2,7 @@ package com.example.yhourstaffproject.activities;
 
 import static android.content.ContentValues.TAG;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -33,7 +34,7 @@ import java.util.Map;
 
 public class SalaryActivity extends AppCompatActivity {
     TextView total_salary_tv, status_salary_tv, start_date_salary_tv, payday_salary_tv;
-    Button received_salary_btn;
+    Button received_salary_btn, salary_list_btn;
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
     FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     @Override
@@ -47,6 +48,15 @@ public class SalaryActivity extends AppCompatActivity {
         start_date_salary_tv = findViewById(R.id.start_date_salary_tv);
         payday_salary_tv = findViewById(R.id.payday_salary_tv);
         received_salary_btn = findViewById(R.id.received_salary_btn);
+        salary_list_btn = findViewById(R.id.salary_list_btn);
+
+        salary_list_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(SalaryActivity.this, SalaryListActivity.class);
+                startActivity(intent);
+            }
+        });
 
         received_salary_btn.setOnClickListener(new View.OnClickListener() {
             @Override
