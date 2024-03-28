@@ -234,7 +234,7 @@ public class StaffHomeFragment extends Fragment {
                     userReference.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            String id = timestamp + dateForTimeKeeping; // Tạo id mới
+                            String id = timestamp + " " + dateForTimeKeeping; // Tạo id mới
                             DatabaseReference newTimekeepingRef = userReference.child(id);
 
                             if (!snapshot.child(id).exists()) {
