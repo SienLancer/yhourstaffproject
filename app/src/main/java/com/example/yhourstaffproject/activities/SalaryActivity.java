@@ -2,10 +2,12 @@ package com.example.yhourstaffproject.activities;
 
 import static android.content.ContentValues.TAG;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,8 +36,9 @@ import java.util.Map;
 
 public class SalaryActivity extends AppCompatActivity {
     TextView total_salary_tv, status_salary_tv, start_date_salary_tv, payday_salary_tv;
-    Button received_salary_btn, salary_list_btn;
+    Button received_salary_btn, salary_list_btn, button_yes, button_no;;
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    Dialog dialog;
     FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +53,14 @@ public class SalaryActivity extends AppCompatActivity {
         received_salary_btn = findViewById(R.id.received_salary_btn);
         salary_list_btn = findViewById(R.id.salary_list_btn);
 
+        dialog=new Dialog(SalaryActivity.this);
+        dialog.setContentView(R.layout.custom_yes_no_dialog);
+
+
+        button_yes =dialog.findViewById(R.id.button_yes);
+        button_no =dialog.findViewById(R.id.button_no);
+
+
         salary_list_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -61,7 +72,21 @@ public class SalaryActivity extends AppCompatActivity {
         received_salary_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                confirmationOfSalaryReceipt();
+                dialog.show();
+                button_yes.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        confirmationOfSalaryReceipt();
+                    }
+                });
+
+                button_no.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        dialog.dismiss();
+                    }
+                });
+
             }
         });
 
@@ -114,6 +139,7 @@ public class SalaryActivity extends AppCompatActivity {
                                     public void onComplete(@NonNull Task<Void> task) {
                                         if (task.isSuccessful()) {
                                             Log.d(TAG, "Data added successfully");
+                                            dialog.dismiss();
                                         } else {
                                             Log.d(TAG, "Failed to add data");
                                         }

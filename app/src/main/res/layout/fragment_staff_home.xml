@@ -104,7 +104,7 @@
             app:srcCompat="@drawable/moneycard" />
 
         <TextView
-            android:id="@+id/textView13"
+            android:id="@+id/total_salary_home_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="17.500.000 VND"
