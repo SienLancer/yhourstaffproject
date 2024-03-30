@@ -24,7 +24,7 @@
             android:gravity="start">
 
             <TextView
-                android:id="@+id/textView7"
+                android:id="@+id/title_name_home_tv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="20dp"
@@ -123,6 +123,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/bg_list_timekeeping_home"
+        android:paddingTop="20dp"
+        android:paddingLeft="30dp"
         android:orientation="vertical">
 
 
@@ -130,8 +132,6 @@
             android:id="@+id/timesheet_title_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="30dp"
-            android:layout_marginTop="20dp"
             android:textSize="18dp"
             android:textColor="#000000"
             android:fontFamily="@font/roboto_bold"
@@ -147,7 +147,6 @@
                 android:id="@+id/textView6"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingLeft="30dp"
                 android:layout_weight="1"
                 android:textColor="@color/black"
                 android:fontFamily="@font/roboto"
@@ -168,8 +167,7 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/timekeeping_recycler_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="8dp" />
+            android:layout_height="match_parent" />
     </LinearLayout>
 
 </LinearLayout>

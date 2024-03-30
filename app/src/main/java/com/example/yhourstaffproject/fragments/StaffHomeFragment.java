@@ -3,15 +3,19 @@ package com.example.yhourstaffproject.fragments;
 import static android.content.ContentValues.TAG;
 
 import android.Manifest;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -58,7 +62,7 @@ public class StaffHomeFragment extends Fragment {
     private TimekeeppingAdapter adapter;
     private List<Timekeeping> timekeepingList = new ArrayList<>();
 
-    TextView total_salary_imgv;
+    TextView total_salary_imgv, title_name_home_tv;
     TextView scan_txt;
     FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
@@ -70,6 +74,7 @@ public class StaffHomeFragment extends Fragment {
         scan_txt = mView.findViewById(R.id.scan_txt);
         on_shift_imgBtn = mView.findViewById(R.id.on_shift_imgBtn);
         total_salary_imgv = mView.findViewById(R.id.total_salary_home_tv);
+        title_name_home_tv = mView.findViewById(R.id.title_name_home_tv);
 
         recyclerView = mView.findViewById(R.id.timekeeping_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -77,6 +82,26 @@ public class StaffHomeFragment extends Fragment {
         recyclerView.setAdapter(adapter);
         setupTimerButtonVisibilityListener();
         loadDataFromFirebase();
+        Dialog dialog = new Dialog(getContext());
+        dialog.setContentView(R.layout.custom_on_shift_dialog);
+        title_name_home_tv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Window window = dialog.getWindow();
+                if (window != null) {
+                    window.setWindowAnimations(R.style.DialogAnimation); // Thiết lập animation cho dialog
+                    window.setLayout(WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT);
+                    window.setGravity(Gravity.TOP | Gravity.START); // Thiết lập dialog nằm ở bên trái
+                }
+
+                WindowManager.LayoutParams layoutParams = window.getAttributes();
+                //layoutParams.x = 100; // Vị trí theo chiều ngang
+                layoutParams.y = 200; // Vị trí theo chiều dọc
+                window.setAttributes(layoutParams);
+
+                dialog.show();
+            }
+        });
         on_shift_imgBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
