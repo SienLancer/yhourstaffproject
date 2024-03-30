@@ -16,6 +16,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,11 +30,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.yhourstaffproject.R;
+import com.example.yhourstaffproject.activities.BottomTabActivity;
 import com.example.yhourstaffproject.activities.SalaryActivity;
-import com.example.yhourstaffproject.activities.TimerActivity;
 import com.example.yhourstaffproject.adapter.TimekeeppingAdapter;
 import com.example.yhourstaffproject.object.Timekeeping;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -46,24 +49,32 @@ import com.google.firebase.database.ValueEventListener;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 
 public class StaffHomeFragment extends Fragment {
     private View mView;
     ImageButton scanQr_imgBtn, on_shift_imgBtn;
+    Button checkout_btn;
     private RecyclerView recyclerView;
     private TimekeeppingAdapter adapter;
+    String hourText, dateText, totalTime;
     private List<Timekeeping> timekeepingList = new ArrayList<>();
 
-    TextView total_salary_imgv, title_name_home_tv;
+    TextView total_salary_imgv, title_name_home_tv, title_checkin_tv, time_hour_tv, time_date_tv;
     TextView scan_txt;
+    Dialog dialog;
+    Calendar currentTime;
     FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
     @Override
@@ -82,34 +93,31 @@ public class StaffHomeFragment extends Fragment {
         recyclerView.setAdapter(adapter);
         setupTimerButtonVisibilityListener();
         loadDataFromFirebase();
-        Dialog dialog = new Dialog(getContext());
+        dialog = new Dialog(getContext());
         dialog.setContentView(R.layout.custom_on_shift_dialog);
-        title_name_home_tv.setOnClickListener(new View.OnClickListener() {
+        title_checkin_tv = dialog.findViewById(R.id.title_checkin_tv);
+        time_hour_tv = dialog.findViewById(R.id.time_hour_tv);
+        time_date_tv = dialog.findViewById(R.id.time_date_tv);
+        checkout_btn = dialog.findViewById(R.id.checkout_btn);
+
+
+        checkout_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Window window = dialog.getWindow();
-                if (window != null) {
-                    window.setWindowAnimations(R.style.DialogAnimation); // Thiết lập animation cho dialog
-                    window.setLayout(WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT);
-                    window.setGravity(Gravity.TOP | Gravity.START); // Thiết lập dialog nằm ở bên trái
-                }
-
-                WindowManager.LayoutParams layoutParams = window.getAttributes();
-                //layoutParams.x = 100; // Vị trí theo chiều ngang
-                layoutParams.y = 200; // Vị trí theo chiều dọc
-                window.setAttributes(layoutParams);
-
-                dialog.show();
+                checkPermissionAndShowActivity(getContext());
             }
         });
+
+
         on_shift_imgBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), TimerActivity.class);
-                startActivity(intent);
-                //addDataTimeKeeping();
+                dialogAnimation();
+                getDataTimeKeeping();
+
             }
         });
+
 
         scanQr_imgBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -139,12 +147,53 @@ public class StaffHomeFragment extends Fragment {
             });
 
     private ActivityResultLauncher<ScanOptions> qrCodeLauncher = registerForActivityResult(new ScanContract(), result -> {
-       if (result.getContents()==null){
-           Toast.makeText(getContext(), "Cancelled", Toast.LENGTH_SHORT).show();
-       }else {
-           setResult(result.getContents());
-       }
+        if (result.getContents() == null) {
+            Toast.makeText(getContext(), "Cancelled", Toast.LENGTH_SHORT).show();
+        } else {
+            FirebaseUser user = mAuth.getCurrentUser();
+            if (user != null) {
+                String userId = user.getUid();
+                DatabaseReference userReference = firebaseDatabase.getReference("User").child(userId).child("timekeeping");
+
+                Query query = userReference.orderByChild("timestamp").limitToLast(1);
+
+                query.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.exists()) {
+                            boolean checkoutExists = false;
+                            // Kiểm tra nếu có ít nhất một mục có trường checkout không rỗng
+                            for (DataSnapshot childSnapshot : snapshot.getChildren()) {
+                                String checkoutTime = childSnapshot.child("checkOut").getValue(String.class);
+                                if (checkoutTime != null && !checkoutTime.isEmpty()) {
+                                    checkoutExists = true;
+                                    break;
+                                }
+                            }
+                            // Cập nhật giao diện dựa trên tồn tại của checkout
+                            if (checkoutExists) { //checkout tồn tại
+                                setResult(result.getContents());
+                            } else { // checkout không tồn tại
+                                handleQRCodeResult(result.getContents());
+                            }
+                        } else {
+                            // Không có dữ liệu, hiển thị nút Timer
+                            on_shift_imgBtn.setVisibility(View.VISIBLE);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        // Xử lý lỗi nếu có
+                        Toast.makeText(getContext(), "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } else {
+                Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+            }
+        }
     });
+
 
     private void setResult(String contents) {
         FirebaseUser user = mAuth.getCurrentUser();
@@ -163,7 +212,7 @@ public class StaffHomeFragment extends Fragment {
                                         if (contents.equals(realtimeqr)){
                                             Toast.makeText(getContext(), "Scan successful!", Toast.LENGTH_SHORT).show();
                                             addDataTimeKeeping();
-                                            startActivity(new Intent(getActivity(), TimerActivity.class));
+//                                            startActivity(new Intent(getActivity(), TimerActivity.class));
 
                                         }else {
                                             Toast.makeText(getContext(), "Scan failed!", Toast.LENGTH_SHORT).show();
@@ -332,11 +381,11 @@ public class StaffHomeFragment extends Fragment {
                             }
                         }
                         // Cập nhật giao diện dựa trên tồn tại của checkout
-                        if (checkoutExists) {
+                        if (checkoutExists) { //checkout tồn tại
                             on_shift_imgBtn.setVisibility(View.GONE);
                             scanQr_imgBtn.setVisibility(View.VISIBLE);
                             scan_txt.setText("Scan QR");
-                        } else {
+                        } else { // checkout không tồn tại
                             on_shift_imgBtn.setVisibility(View.VISIBLE);
                             scanQr_imgBtn.setVisibility(View.GONE);
                             scan_txt.setText("On shift");
@@ -499,7 +548,210 @@ public class StaffHomeFragment extends Fragment {
 
     }
 
+    public void dialogAnimation(){
+        Window window = dialog.getWindow();
+        if (window != null) {
+            window.setWindowAnimations(R.style.DialogAnimation); // Thiết lập animation cho dialog
+            window.setLayout(WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT);
+            window.setGravity(Gravity.TOP | Gravity.START); // Thiết lập dialog nằm ở bên trái
 
+        }
+
+        WindowManager.LayoutParams layoutParams = window.getAttributes();
+        //layoutParams.x = 100; // Vị trí theo chiều ngang
+        layoutParams.y = 200; // Vị trí theo chiều dọc
+        window.setAttributes(layoutParams);
+
+        dialog.show();
+    }
+
+    public void getDataTimeKeeping() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        String userId = user.getUid();
+        if (user != null) {
+            DatabaseReference userReference = firebaseDatabase.getReference("User").child(userId).child("timekeeping");
+
+            // Sắp xếp theo thời gian giảm dần và giới hạn kết quả chỉ lấy 1 mục cuối cùng
+            Query query = userReference.orderByChild("timestamp").limitToLast(1);
+
+            query.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        // Lặp qua kết quả (thoả mãn chỉ có 1 mục) để lấy dữ liệu
+                        for (DataSnapshot childSnapshot : snapshot.getChildren()) {
+                            String checkInTime = childSnapshot.child("checkIn").getValue(String.class);
+                            String[] parts = checkInTime.split(" "); // Tách chuỗi theo dấu cách
+                            String hourPart = parts[1]; // Ghép lại phần ngày tháng năm
+                            String datePart = parts[0]; // Ghép lại phần ngày tháng năm
+                            // Hiển thị dữ liệu
+                            time_hour_tv.setText(hourPart);
+                            time_date_tv.setText(checkInTime);
+
+                        }
+                    } else {
+                        Toast.makeText(getContext(), "Data doesn't exist", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+        } else {
+            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void handleQRCodeResult(String contents) {
+        FirebaseUser user = mAuth.getCurrentUser();
+        String userId = user.getUid();
+        if (user != null) {
+            firebaseDatabase.getReference().addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    String ownerShopId = snapshot.child("User").child(userId).child("shopID").getValue(String.class);
+                    if(ownerShopId != null){
+                        firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("QRCode").child("codeScan")
+                                .addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                        String realtimeqr = snapshot.getValue(String.class);
+                                        if (contents.equals(realtimeqr)){
+                                            Toast.makeText(getContext(), "Check out successful!", Toast.LENGTH_SHORT).show();
+                                            setDataForCheckout();
+                                            totalCost();
+                                            startActivity(new Intent(getActivity(), BottomTabActivity.class));
+                                        }else {
+                                            Toast.makeText(getContext(), "Scan failed!", Toast.LENGTH_SHORT).show();
+                                        }
+
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+
+                                    }
+                                });
+                    }
+                    else {
+                        Toast.makeText(getContext(), "Shop not found", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }else {
+            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+        }
+
+
+    }
+
+    public void setDataForCheckout() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        String userId = user.getUid();
+        if (user != null) {
+            DatabaseReference userReference = firebaseDatabase.getReference("User").
+                    child(userId).child("timekeeping");
+
+            // Đặt dữ liệu cho checkout
+            LocalDateTime now = LocalDateTime.now();
+            int year = now.getYear();
+            int month = now.getMonthValue();
+            int day = now.getDayOfMonth();
+            int hour = now.getHour();
+            int minute = now.getMinute();
+            String minuteFormatted = String.format("%02d", minute);
+
+            String checkoutTime = day + "/" + month + "/" + year + " " + hour + ":" + minuteFormatted;
+
+            // Tạo một đối tượng chứa dữ liệu để đẩy lên Firebase
+            Map<String, Object> checkoutData = new HashMap<>();
+            checkoutData.put("checkOut", checkoutTime);
+
+            // Thực hiện truy vấn để lấy mục cuối cùng
+            Query query = userReference.orderByChild("timestamp").limitToLast(1);
+
+            query.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        // Lặp qua kết quả (thoả mãn chỉ có 1 mục) để cập nhật dữ liệu checkout
+                        for (DataSnapshot childSnapshot : snapshot.getChildren()) {
+                            String lastKey = childSnapshot.getKey();
+
+                            // Thêm dữ liệu checkout vào mục cuối cùng
+                            userReference.child(lastKey).updateChildren(checkoutData)
+                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+                                            // Thành công
+                                            //hasCheckedOut = true;
+
+                                            Toast.makeText(getContext(), "Checkout data set successfully", Toast.LENGTH_SHORT).show();
+                                        }
+                                    })
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            // Lỗi xảy ra
+                                            Toast.makeText(getContext(), "Failed to set checkout data", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                        }
+                    } else {
+                        // Không tìm thấy dữ liệu
+                        Toast.makeText(getContext(), "No data found", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    // Lỗi xảy ra
+                    Toast.makeText(getContext(), "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+
+        } else {
+            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
+    public void totalCost() {
+        Calendar checkoutTime = Calendar.getInstance();
+         hourText = time_hour_tv.getText().toString();
+         dateText = time_date_tv.getText().toString();
+         totalTime = dateText + " " + hourText;
+        Log.d(TAG, "totalTime: " + totalTime);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MMd/yyyy HH:mm", Locale.getDefault());
+        try {
+            Date parsedDate = dateFormat.parse(dateText);
+            checkoutTime.setTime(parsedDate);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        // Tính toán thời gian giữa checkoutTime và thời gian đã set trước đó
+        long timeDifferenceInMillis = checkoutTime.getTimeInMillis() - currentTime.getTimeInMillis();
+
+        // Chuyển đổi thời gian từ millis thành giờ
+        double totalHours = timeDifferenceInMillis / (1000.0 * 3600);
+
+        // Tính số tiền tương ứng
+        double totalCost = Math.abs(totalHours) * 15000; // Sử dụng giá trị tuyệt đối của totalHours
+        Log.d(TAG, "totalCost: " + totalCost);
+
+        // Hiển thị số tiền lên giao diện người dùng
+        Toast.makeText(getContext(), String.format(Locale.getDefault(), "Total cost: %.0f VND", totalCost), Toast.LENGTH_LONG).show();
+    }
 
 
 }

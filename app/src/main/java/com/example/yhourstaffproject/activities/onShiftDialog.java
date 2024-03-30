@@ -24,6 +24,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 
 import com.example.yhourstaffproject.R;
@@ -53,36 +54,36 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-public class TimerActivity extends AppCompatActivity {
+public class onShiftDialog extends DialogFragment {
 
-    private TextView timerTextView;
-    private Button checkoutButton;
-    private Calendar currentTime;
+     TextView time_date_tv, time_hour_tv;
+     Button checkoutButton;
+     Calendar currentTime;
     FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
-    private static final String PREFS_NAME = "MyPrefsFile";
 
 
     private ActivityResultLauncher<ScanOptions> qrCodeLauncher;
     private ActivityResultLauncher<String> requestPermissionLauncher;
 
-    @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_timer);
 
-        timerTextView = findViewById(R.id.timer_text_view);
-        checkoutButton = findViewById(R.id.checkout_button);
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.custom_on_shift_dialog, container, false);
+
+        time_hour_tv = view.findViewById(R.id.time_hour_tv);
+        time_date_tv = view.findViewById(R.id.time_date_tv);
+
 
         currentTime = Calendar.getInstance(); // Lấy thời gian hiện tại
 
 
-        checkoutButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                checkPermissionAndShowActivity(getApplicationContext());
-            }
-        });
+//        checkoutButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                checkPermissionAndShowActivity(getContext());
+//            }
+//        });
 
         requestPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted ->{
             if (isGranted){
@@ -96,7 +97,7 @@ public class TimerActivity extends AppCompatActivity {
             if (result.getContents() != null) {
                 handleQRCodeResult(result.getContents());
             } else {
-                Toast.makeText(TimerActivity.this, "Cancelled", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Cancelled", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -113,6 +114,8 @@ public class TimerActivity extends AppCompatActivity {
                 getDataTimeKeeping();
             }
         }, delayMillis);
+
+        return view;
     }
 
     public void getDataTimeKeeping() {
@@ -132,21 +135,21 @@ public class TimerActivity extends AppCompatActivity {
                         for (DataSnapshot childSnapshot : snapshot.getChildren()) {
                             String checkInTime = childSnapshot.child("checkIn").getValue(String.class);
                             // Hiển thị dữ liệu
-                            timerTextView.setText(checkInTime);
+                            time_hour_tv.setText(checkInTime);
                         }
                     } else {
-                        Toast.makeText(TimerActivity.this, "Data doesn't exist", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Data doesn't exist", Toast.LENGTH_SHORT).show();
                     }
                 }
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
-                    Toast.makeText(TimerActivity.this, "Error", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
                 }
             });
 
         } else {
-            Toast.makeText(TimerActivity.this, "User not logged in", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -195,12 +198,12 @@ public class TimerActivity extends AppCompatActivity {
                                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                                         String realtimeqr = snapshot.getValue(String.class);
                                         if (contents.equals(realtimeqr)){
-                                            Toast.makeText(TimerActivity.this, "Check out successful!", Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(getContext(), "Check out successful!", Toast.LENGTH_SHORT).show();
                                             setDataForCheckout();
                                             totalCost();
-                                            startActivity(new Intent(TimerActivity.this, BottomTabActivity.class));
+                                            startActivity(new Intent(getActivity(), BottomTabActivity.class));
                                         }else {
-                                            Toast.makeText(TimerActivity.this, "Scan failed!", Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(getContext(), "Scan failed!", Toast.LENGTH_SHORT).show();
                                         }
 
                                     }
@@ -212,17 +215,17 @@ public class TimerActivity extends AppCompatActivity {
                                 });
                     }
                     else {
-                        Toast.makeText(TimerActivity.this, "Shop not found", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Shop not found", Toast.LENGTH_SHORT).show();
                     }
                 }
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
-                    Toast.makeText(TimerActivity.this, "Error", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
                 }
             });
         }else {
-            Toast.makeText(TimerActivity.this, "User not logged in", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
         }
 
 
@@ -269,32 +272,32 @@ public class TimerActivity extends AppCompatActivity {
                                             // Thành công
                                             //hasCheckedOut = true;
 
-                                            Toast.makeText(TimerActivity.this, "Checkout data set successfully", Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(getContext(), "Checkout data set successfully", Toast.LENGTH_SHORT).show();
                                         }
                                     })
                                     .addOnFailureListener(new OnFailureListener() {
                                         @Override
                                         public void onFailure(@NonNull Exception e) {
                                             // Lỗi xảy ra
-                                            Toast.makeText(TimerActivity.this, "Failed to set checkout data", Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(getContext(), "Failed to set checkout data", Toast.LENGTH_SHORT).show();
                                         }
                                     });
                         }
                     } else {
                         // Không tìm thấy dữ liệu
-                        Toast.makeText(TimerActivity.this, "No data found", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "No data found", Toast.LENGTH_SHORT).show();
                     }
                 }
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
                     // Lỗi xảy ra
-                    Toast.makeText(TimerActivity.this, "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             });
 
         } else {
-            Toast.makeText(TimerActivity.this, "User not logged in", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -304,7 +307,7 @@ public class TimerActivity extends AppCompatActivity {
                 Manifest.permission.CAMERA
         )== PackageManager.PERMISSION_GRANTED){
             showCamera();
-            setDataQrCode();
+            setDataQrCodeCheckOut();
 
         }else if(shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
             Toast.makeText(context, "Camera permission required", Toast.LENGTH_SHORT).show();
@@ -317,7 +320,7 @@ public class TimerActivity extends AppCompatActivity {
 
     public void totalCost() {
         Calendar checkoutTime = Calendar.getInstance();
-        String timerText = timerTextView.getText().toString();
+        String timerText = time_hour_tv.getText().toString();
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
         try {
             Date parsedDate = dateFormat.parse(timerText);
@@ -337,10 +340,10 @@ public class TimerActivity extends AppCompatActivity {
         double totalCost = Math.abs(totalHours) * 15000; // Sử dụng giá trị tuyệt đối của totalHours
 
         // Hiển thị số tiền lên giao diện người dùng
-        Toast.makeText(TimerActivity.this, String.format(Locale.getDefault(), "Total cost: %.0f VND", totalCost), Toast.LENGTH_SHORT).show();
+        Toast.makeText(getContext(), String.format(Locale.getDefault(), "Total cost: %.0f VND", totalCost), Toast.LENGTH_SHORT).show();
     }
 
-    public void setDataQrCode(){
+    public void setDataQrCodeCheckOut(){
 
         FirebaseUser user = mAuth.getCurrentUser();
         String userId = user.getUid();
@@ -375,24 +378,24 @@ public class TimerActivity extends AppCompatActivity {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (task.isSuccessful()) {
-                                    Toast.makeText(TimerActivity.this, "QR Code updated successfully", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getContext(), "QR Code updated successfully", Toast.LENGTH_SHORT).show();
                                 } else {
-                                    Toast.makeText(TimerActivity.this, "Failed to update QR Code", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getContext(), "Failed to update QR Code", Toast.LENGTH_SHORT).show();
                                 }
                             }
                         });
                     } else {
-                        Toast.makeText(TimerActivity.this, "Shop not found", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Shop not found", Toast.LENGTH_SHORT).show();
                     }
                 }
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
-                    Toast.makeText(TimerActivity.this, "Error", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
                 }
             });
         } else {
-            Toast.makeText(TimerActivity.this, "User not logged in", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
         }
 
     }
