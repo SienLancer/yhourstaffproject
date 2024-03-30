@@ -56,7 +56,6 @@ import java.util.Map;
 public class TimerActivity extends AppCompatActivity {
 
     private TextView timerTextView;
-    private boolean hasCheckedOut = false;
     private Button checkoutButton;
     private Calendar currentTime;
     FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();

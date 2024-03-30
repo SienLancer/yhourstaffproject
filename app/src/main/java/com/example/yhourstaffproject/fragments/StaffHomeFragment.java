@@ -56,9 +56,9 @@ import java.util.Map;
 
 public class StaffHomeFragment extends Fragment {
     private View mView;
-    ImageButton scanQr_imgBtn;
-    Button timer_btn;
-    ImageView total_salary_imgv;
+    ImageButton scanQr_imgBtn, on_shift_imgBtn;
+
+    TextView total_salary_imgv;
     TextView scan_txt;
     FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
@@ -68,11 +68,11 @@ public class StaffHomeFragment extends Fragment {
         mView =inflater.inflate(R.layout.fragment_staff_home, container, false);
         scanQr_imgBtn = mView.findViewById(R.id.scanQr_imgBtn);
         scan_txt = mView.findViewById(R.id.scan_txt);
-        timer_btn = mView.findViewById(R.id.timer_btn);
-        total_salary_imgv = mView.findViewById(R.id.total_salary_imgv);
+        on_shift_imgBtn = mView.findViewById(R.id.on_shift_imgBtn);
+        total_salary_imgv = mView.findViewById(R.id.total_salary_home_tv);
         setupTimerButtonVisibilityListener();
 
-        timer_btn.setOnClickListener(new View.OnClickListener() {
+        on_shift_imgBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), TimerActivity.class);
@@ -303,17 +303,17 @@ public class StaffHomeFragment extends Fragment {
                         }
                         // Cập nhật giao diện dựa trên tồn tại của checkout
                         if (checkoutExists) {
-                            timer_btn.setVisibility(View.GONE);
+                            on_shift_imgBtn.setVisibility(View.GONE);
                             scanQr_imgBtn.setVisibility(View.VISIBLE);
                             scan_txt.setText("Scan QR");
                         } else {
-                            timer_btn.setVisibility(View.VISIBLE);
+                            on_shift_imgBtn.setVisibility(View.VISIBLE);
                             scanQr_imgBtn.setVisibility(View.GONE);
                             scan_txt.setText("On shift");
                         }
                     } else {
                         // Không có dữ liệu, hiển thị nút Timer
-                        timer_btn.setVisibility(View.VISIBLE);
+                        on_shift_imgBtn.setVisibility(View.VISIBLE);
                     }
                 }
 

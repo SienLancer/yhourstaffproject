@@ -77,6 +77,7 @@ public class SalaryActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         confirmationOfSalaryReceipt();
+                        dialog.dismiss();
                     }
                 });
 
@@ -139,7 +140,7 @@ public class SalaryActivity extends AppCompatActivity {
                                     public void onComplete(@NonNull Task<Void> task) {
                                         if (task.isSuccessful()) {
                                             Log.d(TAG, "Data added successfully");
-                                            dialog.dismiss();
+
                                         } else {
                                             Log.d(TAG, "Failed to add data");
                                         }
