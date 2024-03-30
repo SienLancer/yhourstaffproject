@@ -6,17 +6,13 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,10 +21,14 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.yhourstaffproject.R;
 import com.example.yhourstaffproject.activities.SalaryActivity;
 import com.example.yhourstaffproject.activities.TimerActivity;
+import com.example.yhourstaffproject.adapter.TimekeeppingAdapter;
+import com.example.yhourstaffproject.object.Timekeeping;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -39,24 +39,24 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.MultiFormatWriter;
-import com.google.zxing.common.BitMatrix;
-import com.journeyapps.barcodescanner.BarcodeEncoder;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Locale;
+import java.util.List;
 import java.util.Map;
 
 
 public class StaffHomeFragment extends Fragment {
     private View mView;
     ImageButton scanQr_imgBtn, on_shift_imgBtn;
+    private RecyclerView recyclerView;
+    private TimekeeppingAdapter adapter;
+    private List<Timekeeping> timekeepingList = new ArrayList<>();
 
     TextView total_salary_imgv;
     TextView scan_txt;
@@ -70,8 +70,13 @@ public class StaffHomeFragment extends Fragment {
         scan_txt = mView.findViewById(R.id.scan_txt);
         on_shift_imgBtn = mView.findViewById(R.id.on_shift_imgBtn);
         total_salary_imgv = mView.findViewById(R.id.total_salary_home_tv);
-        setupTimerButtonVisibilityListener();
 
+        recyclerView = mView.findViewById(R.id.timekeeping_recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        adapter = new TimekeeppingAdapter(timekeepingList);
+        recyclerView.setAdapter(adapter);
+        setupTimerButtonVisibilityListener();
+        loadDataFromFirebase();
         on_shift_imgBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -397,7 +402,77 @@ public class StaffHomeFragment extends Fragment {
 
     }
 
+    private void loadDataFromFirebase() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        String userId = user.getUid();
+        if (user != null) {
+            firebaseDatabase.getReference().addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    String ownerShopId = snapshot.child("User").child(userId).child("shopID").getValue(String.class);
+                    Log.d(TAG, "Owner Shop ID: " + ownerShopId);
+                    if (ownerShopId != null) {
+                        firebaseDatabase.getReference("User").addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+//                                boolean shopFound = false;
+                                for (DataSnapshot userSnapshot : snapshot.getChildren()) {
+                                    String userKey = userSnapshot.getKey();
 
+
+                                    if (userKey != null && userKey.equals(userId)){
+//                                        String timekeepingKey = userSnapshot.child("timekeeping").getKey();
+//                                        Log.d(TAG, "Timekeeping Key: " + timekeepingKey);
+                                        for (DataSnapshot timekeepingSnapshot : snapshot.child(userKey).child("timekeeping").getChildren()) {
+                                            //String timekeepingId = timekeepingSnapshot.getKey();
+
+                                            String checkIn = timekeepingSnapshot.child("checkIn").getValue(String.class);
+                                            String checkOut = timekeepingSnapshot.child("checkOut").getValue(String.class);
+                                            String[] parts = checkIn.split(" "); // Tách chuỗi theo dấu cách
+                                            String datePart = parts[0]; // Ghép lại phần ngày tháng năm
+                                            Log.d(TAG, "Date: " + datePart);
+
+                                            Log.d(TAG, "Check In: " + checkIn);
+                                            Log.d(TAG, "Check Out: " + checkOut);
+                                            timekeepingList.add(new Timekeeping(datePart, checkIn, checkOut));
+                                            adapter.notifyDataSetChanged();
+
+
+                                        }
+
+
+                                        return; // Kết thúc vòng lặp sau khi tìm thấy tuần có ID trùng khớp
+                                    }
+
+
+                                }
+
+
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }else {
+                        Toast.makeText(getContext(), "Shop not found", Toast.LENGTH_SHORT).show();
+                    }
+
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+
+        } else {
+            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+        }
+
+
+    }
 
 
 

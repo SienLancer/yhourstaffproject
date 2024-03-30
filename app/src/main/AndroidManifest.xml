@@ -34,6 +34,9 @@
             android:name=".activities.TimerActivity"
             android:exported="false" />
         <activity
+            android:name=".activities.TimekeepingListActivity"
+            android:exported="false" />
+        <activity
             android:name=".activities.BottomTabActivity"
             android:exported="false" />
         <activity
