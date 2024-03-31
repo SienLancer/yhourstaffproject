@@ -1,0 +1,11 @@
+<!-- res/anim/flip_animation.xml -->
+<set xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Rotate from 0 to 180 degrees -->
+    <rotate
+        android:fromDegrees="0"
+        android:toDegrees="360"
+        android:pivotX="50%"
+        android:pivotY="50%"
+        android:duration="1000"
+ />
+</set>

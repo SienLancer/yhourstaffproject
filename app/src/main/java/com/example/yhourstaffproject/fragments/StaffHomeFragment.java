@@ -7,6 +7,8 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.Log;
@@ -95,6 +97,7 @@ public class StaffHomeFragment extends Fragment {
         loadDataFromFirebase();
         dialog = new Dialog(getContext());
         dialog.setContentView(R.layout.custom_on_shift_dialog);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         title_checkin_tv = dialog.findViewById(R.id.title_checkin_tv);
         time_hour_tv = dialog.findViewById(R.id.time_hour_tv);
         time_date_tv = dialog.findViewById(R.id.time_date_tv);

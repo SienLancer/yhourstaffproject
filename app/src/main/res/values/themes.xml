@@ -11,4 +11,8 @@
         <item name="android:windowEnterAnimation">@anim/slide_in_left</item>
     </style>
 
+    <style name="RotateAnimation">
+        <item name="android:windowEnterAnimation">@anim/rotate_animation</item>
+    </style>
+
 </resources>

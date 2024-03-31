@@ -1,13 +1,19 @@
 package com.example.yhourstaffproject.activities;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -28,7 +34,10 @@ public class SignInForStaffActivity extends AppCompatActivity {
     EditText usernameSLogin_edt, pwSLogin_edt;
     Button loginS_btn;
     private FirebaseAuth mAuth;
+    ImageView loading_imgv;
     ProgressDialog progressDialog;
+    AlertDialog dialog;
+    Animation animation;
     FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,10 +59,25 @@ public class SignInForStaffActivity extends AppCompatActivity {
         loginS_btn = findViewById(R.id.loginS_btn);
         pwSLogin_edt = findViewById(R.id.pwSLogin_edt);
         usernameSLogin_edt = findViewById(R.id.usernameSLogin_edt);
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setTitle("Loading");
-        progressDialog.setMessage("please wait...");
-        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+//        progressDialog = new ProgressDialog(this);
+//        progressDialog.setTitle("Loading");
+//        progressDialog.setMessage("please wait...");
+//        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setCancelable(false); // Tùy chỉnh tùy theo nhu cầu của bạn
+        View view = getLayoutInflater().inflate(R.layout.custom_loading_dialog, null);
+        loading_imgv = view.findViewById(R.id.loading_imgv);
+
+        builder.setView(view);
+        dialog = builder.create();
+        //dialog.getWindow().setWindowAnimations(R.style.RotateAnimation);
+        dialog.getWindow().setLayout(130, 130);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        animation = AnimationUtils.loadAnimation(this, R.anim.rotate_animation);
+        loading_imgv.startAnimation(animation);
+
+
 
 
 
@@ -82,12 +106,12 @@ public class SignInForStaffActivity extends AppCompatActivity {
             Toast.makeText(this, "Vui lòng nhập lại cái pass giùm!", Toast.LENGTH_SHORT).show();
             return;
         }
-        progressDialog.show();
+        dialog.show();
         mAuth.signInWithEmailAndPassword(username, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()){
-                    progressDialog.dismiss();
+
                     String id = task.getResult().getUser().getUid();
                     firebaseDatabase.getReference().child("User").child(id).child("role")
                             .addListenerForSingleValueEvent(new ValueEventListener() {
@@ -98,6 +122,7 @@ public class SignInForStaffActivity extends AppCompatActivity {
 
                                         Intent i = new Intent(SignInForStaffActivity.this, BottomTabActivity.class);
                                         startActivity(i);
+                                        dialog.dismiss();
                                         Toast.makeText(getApplicationContext(), "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
                                     }else {
                                         Toast.makeText(getApplicationContext(), "Email or password incorrect!", Toast.LENGTH_SHORT).show();
@@ -111,7 +136,7 @@ public class SignInForStaffActivity extends AppCompatActivity {
                             });
 
                 }else {
-                    progressDialog.dismiss();
+                    dialog.dismiss();
                     Toast.makeText(getApplicationContext(), "Đăng nhập không thành công!", Toast.LENGTH_SHORT).show();
                 }
             }

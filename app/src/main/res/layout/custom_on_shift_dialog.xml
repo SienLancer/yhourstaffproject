@@ -8,8 +8,8 @@
     android:background="@drawable/dialog_on_shift_bg"
     android:clipChildren="true"
     android:orientation="vertical"
-    android:paddingHorizontal="90dp"
-    android:paddingVertical="75dp">
+    android:paddingHorizontal="80dp"
+    android:paddingVertical="60dp">
 
     <TextView
         android:id="@+id/title_checkin_tv"
