@@ -526,40 +526,31 @@ public class StaffHomeFragment extends Fragment {
                         firebaseDatabase.getReference("User").addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot snapshot) {
-//                                boolean shopFound = false;
+                                List<Timekeeping> reversedTimekeepingList = new ArrayList<>(); // Danh sách mới để lưu trữ thời gian làm việc theo thứ tự ngược lại
                                 for (DataSnapshot userSnapshot : snapshot.getChildren()) {
                                     String userKey = userSnapshot.getKey();
-
-
-                                    if (userKey != null && userKey.equals(userId)){
-//                                        String timekeepingKey = userSnapshot.child("timekeeping").getKey();
-//                                        Log.d(TAG, "Timekeeping Key: " + timekeepingKey);
+                                    if (userKey != null && userKey.equals(userId)) {
                                         for (DataSnapshot timekeepingSnapshot : snapshot.child(userKey).child("timekeeping").getChildren()) {
-                                            //String timekeepingId = timekeepingSnapshot.getKey();
-
                                             String checkIn = timekeepingSnapshot.child("checkIn").getValue(String.class);
                                             String checkOut = timekeepingSnapshot.child("checkOut").getValue(String.class);
                                             String[] parts = checkIn.split(" "); // Tách chuỗi theo dấu cách
                                             String datePart = parts[0]; // Ghép lại phần ngày tháng năm
                                             Log.d(TAG, "Date: " + datePart);
-
                                             Log.d(TAG, "Check In: " + checkIn);
                                             Log.d(TAG, "Check Out: " + checkOut);
-                                            timekeepingList.add(new Timekeeping(datePart, checkIn, checkOut));
-                                            loadDialog.dismiss();
-                                            adapter.notifyDataSetChanged();
-
-
+                                            // Thêm thời gian làm việc vào đầu danh sách mới
+                                            reversedTimekeepingList.add(0, new Timekeeping(datePart, checkIn, checkOut));
                                         }
-
-
-                                        return; // Kết thúc vòng lặp sau khi tìm thấy tuần có ID trùng khớp
+                                        // Đã duyệt xong danh sách, thoát khỏi vòng lặp
+                                        break;
                                     }
-
-
                                 }
-
-
+                                // Xóa tất cả các mục cũ trong danh sách thời gian làm việc
+                                timekeepingList.clear();
+                                // Thêm tất cả các mục từ danh sách mới đã đảo ngược vào danh sách thời gian làm việc
+                                timekeepingList.addAll(reversedTimekeepingList);
+                                loadDialog.dismiss();
+                                adapter.notifyDataSetChanged();
                             }
 
                             @Override
@@ -567,10 +558,9 @@ public class StaffHomeFragment extends Fragment {
                                 Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
                             }
                         });
-                    }else {
+                    } else {
                         Toast.makeText(getContext(), "Shop not found", Toast.LENGTH_SHORT).show();
                     }
-
                 }
 
                 @Override
@@ -578,13 +568,11 @@ public class StaffHomeFragment extends Fragment {
 
                 }
             });
-
         } else {
             Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
         }
-
-
     }
+
 
     public void dialogAnimation(){
         Window window = dialog.getWindow();
