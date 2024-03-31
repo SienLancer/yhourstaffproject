@@ -65,7 +65,7 @@ import java.util.Map;
 public class StaffHomeFragment extends Fragment {
     private View mView;
     ImageButton scanQr_imgBtn, on_shift_imgBtn;
-    Button checkout_btn;
+    ImageButton checkout_btn;
     private RecyclerView recyclerView;
     private TimekeeppingAdapter adapter;
     String hourText, dateText, totalTime;
@@ -99,6 +99,13 @@ public class StaffHomeFragment extends Fragment {
         time_hour_tv = dialog.findViewById(R.id.time_hour_tv);
         time_date_tv = dialog.findViewById(R.id.time_date_tv);
         checkout_btn = dialog.findViewById(R.id.checkout_btn);
+
+        title_name_home_tv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialogAnimation();
+            }
+        });
 
 
         checkout_btn.setOnClickListener(new View.OnClickListener() {
@@ -586,7 +593,7 @@ public class StaffHomeFragment extends Fragment {
                             String datePart = parts[0]; // Ghép lại phần ngày tháng năm
                             // Hiển thị dữ liệu
                             time_hour_tv.setText(hourPart);
-                            time_date_tv.setText(checkInTime);
+                            time_date_tv.setText(datePart);
 
                         }
                     } else {
@@ -622,7 +629,7 @@ public class StaffHomeFragment extends Fragment {
                                         if (contents.equals(realtimeqr)){
                                             Toast.makeText(getContext(), "Check out successful!", Toast.LENGTH_SHORT).show();
                                             setDataForCheckout();
-                                            totalCost();
+                                            //totalCost();
                                             startActivity(new Intent(getActivity(), BottomTabActivity.class));
                                         }else {
                                             Toast.makeText(getContext(), "Scan failed!", Toast.LENGTH_SHORT).show();
@@ -730,9 +737,9 @@ public class StaffHomeFragment extends Fragment {
          dateText = time_date_tv.getText().toString();
          totalTime = dateText + " " + hourText;
         Log.d(TAG, "totalTime: " + totalTime);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MMd/yyyy HH:mm", Locale.getDefault());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
         try {
-            Date parsedDate = dateFormat.parse(dateText);
+            Date parsedDate = dateFormat.parse(totalTime);
             checkoutTime.setTime(parsedDate);
         } catch (ParseException e) {
             e.printStackTrace();
@@ -747,10 +754,9 @@ public class StaffHomeFragment extends Fragment {
 
         // Tính số tiền tương ứng
         double totalCost = Math.abs(totalHours) * 15000; // Sử dụng giá trị tuyệt đối của totalHours
-        Log.d(TAG, "totalCost: " + totalCost);
 
         // Hiển thị số tiền lên giao diện người dùng
-        Toast.makeText(getContext(), String.format(Locale.getDefault(), "Total cost: %.0f VND", totalCost), Toast.LENGTH_LONG).show();
+        Toast.makeText(getContext(), String.format(Locale.getDefault(), "Total cost: %.0f VND", totalCost), Toast.LENGTH_SHORT).show();
     }
 
 

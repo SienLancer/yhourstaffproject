@@ -2,20 +2,21 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/frameLayout_dialog"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/dialog_on_shift_bg"
+    android:clipChildren="true"
     android:orientation="vertical"
-    android:paddingVertical="75dp"
-    android:layout_marginRight="0dp"
-    android:paddingHorizontal="90dp">
+    android:paddingHorizontal="90dp"
+    android:paddingVertical="75dp">
 
     <TextView
         android:id="@+id/title_checkin_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/roboto"
         android:layout_gravity="center"
+        android:fontFamily="@font/roboto"
         android:text="You checked in at"
         android:textColor="@color/white"
         android:textSize="16sp" />
@@ -24,8 +25,8 @@
         android:id="@+id/time_hour_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
         android:layout_gravity="center"
+        android:layout_marginTop="30dp"
         android:fontFamily="@font/roboto_bold"
         android:text="00:00"
         android:textColor="@color/white"
@@ -35,9 +36,9 @@
         android:id="@+id/time_date_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:layout_marginTop="15dp"
         android:fontFamily="@font/roboto"
-        android:layout_gravity="center"
         android:text="01/01/2024"
         android:textColor="@color/white"
         android:textSize="16sp" />
@@ -47,20 +48,56 @@
         android:layout_height="match_parent"
         android:layout_marginTop="20dp"
         android:orientation="horizontal">
-
-        <Button
-            android:id="@+id/checkout_btn"
+        <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Checkout" />
+            android:orientation="vertical"
+            android:layout_height="wrap_content">
+            <ImageButton
+                android:id="@+id/checkout_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                app:srcCompat="@drawable/check_out_btn"
+                android:background="@color/background"
+                android:text="Checkout" />
 
-        <Button
-            android:id="@+id/cancel_shift_btn"
+            <TextView
+                android:layout_width="wrap_content"
+                android:textSize="12sp"
+                android:textColor="@color/white"
+                android:layout_gravity="center"
+                android:text="Checkout"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+
+        <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Cancel" />
+            android:orientation="vertical"
+            android:layout_height="wrap_content">
+            <ImageButton
+                android:id="@+id/cancel_shift_btn"
+                android:layout_width="wrap_content"
+                android:layout_gravity="center"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/cancel_shift_btn"
+                android:background="@color/background"
+                android:text="Cancel" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:textSize="12sp"
+                android:layout_gravity="center"
+                android:textColor="@color/white"
+                android:text="Cancel"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
     </LinearLayout>
+
+
+
 
 </LinearLayout>
