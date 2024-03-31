@@ -3,6 +3,7 @@ package com.example.yhourstaffproject.fragments;
 import static android.content.ContentValues.TAG;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -18,8 +19,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -77,6 +81,9 @@ public class StaffHomeFragment extends Fragment {
     TextView scan_txt;
     Dialog dialog;
     Calendar currentTime;
+    ImageView loading_imgv;
+    AlertDialog loadDialog;
+    Animation animation;
     FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
     @Override
@@ -88,7 +95,7 @@ public class StaffHomeFragment extends Fragment {
         on_shift_imgBtn = mView.findViewById(R.id.on_shift_imgBtn);
         total_salary_imgv = mView.findViewById(R.id.total_salary_home_tv);
         title_name_home_tv = mView.findViewById(R.id.title_name_home_tv);
-
+        loadDialog();
         recyclerView = mView.findViewById(R.id.timekeeping_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new TimekeeppingAdapter(timekeepingList);
@@ -204,6 +211,21 @@ public class StaffHomeFragment extends Fragment {
         }
     });
 
+
+    public void loadDialog(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setCancelable(false); // Tùy chỉnh tùy theo nhu cầu của bạn
+        View view = getLayoutInflater().inflate(R.layout.custom_loading_dialog, null);
+        loading_imgv = view.findViewById(R.id.loading_imgv);
+
+        builder.setView(view);
+        loadDialog = builder.create();
+        //dialog.getWindow().setWindowAnimations(R.style.RotateAnimation);
+        loadDialog.getWindow().setLayout(130, 130);
+        loadDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        animation = AnimationUtils.loadAnimation(getContext(), R.anim.rotate_animation);
+        loading_imgv.startAnimation(animation);
+    }
 
     private void setResult(String contents) {
         FirebaseUser user = mAuth.getCurrentUser();
@@ -487,6 +509,7 @@ public class StaffHomeFragment extends Fragment {
     }
 
     private void loadDataFromFirebase() {
+        loadDialog.show();
         FirebaseUser user = mAuth.getCurrentUser();
         String userId = user.getUid();
         if (user != null) {
@@ -519,6 +542,7 @@ public class StaffHomeFragment extends Fragment {
                                             Log.d(TAG, "Check In: " + checkIn);
                                             Log.d(TAG, "Check Out: " + checkOut);
                                             timekeepingList.add(new Timekeeping(datePart, checkIn, checkOut));
+                                            loadDialog.dismiss();
                                             adapter.notifyDataSetChanged();
 
 

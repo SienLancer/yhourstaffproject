@@ -35,7 +35,6 @@ public class SignInForStaffActivity extends AppCompatActivity {
     Button loginS_btn;
     private FirebaseAuth mAuth;
     ImageView loading_imgv;
-    ProgressDialog progressDialog;
     AlertDialog dialog;
     Animation animation;
     FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
@@ -64,18 +63,7 @@ public class SignInForStaffActivity extends AppCompatActivity {
 //        progressDialog.setMessage("please wait...");
 //        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setCancelable(false); // Tùy chỉnh tùy theo nhu cầu của bạn
-        View view = getLayoutInflater().inflate(R.layout.custom_loading_dialog, null);
-        loading_imgv = view.findViewById(R.id.loading_imgv);
-
-        builder.setView(view);
-        dialog = builder.create();
-        //dialog.getWindow().setWindowAnimations(R.style.RotateAnimation);
-        dialog.getWindow().setLayout(130, 130);
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        animation = AnimationUtils.loadAnimation(this, R.anim.rotate_animation);
-        loading_imgv.startAnimation(animation);
+        loadDialog();
 
 
 
@@ -92,6 +80,21 @@ public class SignInForStaffActivity extends AppCompatActivity {
         });
 
 
+    }
+
+    public void loadDialog(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setCancelable(false); // Tùy chỉnh tùy theo nhu cầu của bạn
+        View view = getLayoutInflater().inflate(R.layout.custom_loading_dialog, null);
+        loading_imgv = view.findViewById(R.id.loading_imgv);
+
+        builder.setView(view);
+        dialog = builder.create();
+        //dialog.getWindow().setWindowAnimations(R.style.RotateAnimation);
+        dialog.getWindow().setLayout(130, 130);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        animation = AnimationUtils.loadAnimation(this, R.anim.rotate_animation);
+        loading_imgv.startAnimation(animation);
     }
 
     private void login() {
