@@ -30,6 +30,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -193,8 +194,11 @@ public class SalaryActivity extends AppCompatActivity {
                                         Integer currentSalary = salarySnapshot.child("currentSalary").getValue(Integer.class);
                                         String payDay = salarySnapshot.child("payDay").getValue(String.class);
 
+                                        DecimalFormat formatter = new DecimalFormat("#,###");
+                                        String formattedSalary = formatter.format(currentSalary);
+
                                         // Update UI with data from relevant key
-                                        total_salary_tv.setText(String.valueOf(currentSalary));
+                                        total_salary_tv.setText(formattedSalary + " VND");
                                         status_salary_tv.setText(status);
                                         start_date_salary_tv.setText(startDate);
                                         payday_salary_tv.setText(payDay);

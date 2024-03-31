@@ -55,6 +55,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
 
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -78,7 +79,7 @@ public class StaffHomeFragment extends Fragment {
     private List<Timekeeping> timekeepingList = new ArrayList<>();
 
     TextView total_salary_imgv, title_name_home_tv, title_checkin_tv, time_hour_tv, time_date_tv;
-    TextView scan_txt;
+    TextView scan_txt, total_salary_home_tv;
     Dialog dialog;
     Calendar currentTime;
     ImageView loading_imgv;
@@ -95,6 +96,7 @@ public class StaffHomeFragment extends Fragment {
         on_shift_imgBtn = mView.findViewById(R.id.on_shift_imgBtn);
         total_salary_imgv = mView.findViewById(R.id.total_salary_home_tv);
         title_name_home_tv = mView.findViewById(R.id.title_name_home_tv);
+        total_salary_home_tv = mView.findViewById(R.id.total_salary_home_tv);
         loadDialog();
         recyclerView = mView.findViewById(R.id.timekeeping_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -102,6 +104,7 @@ public class StaffHomeFragment extends Fragment {
         recyclerView.setAdapter(adapter);
         setupTimerButtonVisibilityListener();
         getUsername();
+        loadDataSalary();
         loadDataFromFirebase();
         dialog = new Dialog(getContext());
         dialog.setContentView(R.layout.custom_on_shift_dialog);
@@ -785,6 +788,63 @@ public class StaffHomeFragment extends Fragment {
 
         } else {
             Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void loadDataSalary() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user != null) {
+            String userId = user.getUid();
+            DatabaseReference userRef = firebaseDatabase.getReference("User");
+
+            userRef.child(userId).child("shopID").addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    String ownerShopId = snapshot.getValue(String.class);
+                    if (ownerShopId != null) {
+                        userRef.child(userId).child("salary").addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                for (DataSnapshot salarySnapshot : snapshot.getChildren()) {
+                                    String status = salarySnapshot.child("status").getValue(String.class);
+                                    if (status != null && status.equals("Not paid yet")) {
+                                        // Only process data if status is "Not paid yet"
+
+                                        Integer currentSalary = salarySnapshot.child("currentSalary").getValue(Integer.class);
+
+                                        DecimalFormat formatter = new DecimalFormat("#,###");
+                                        String formattedSalary = formatter.format(currentSalary);
+
+                                        // Update UI with data from relevant key
+                                        total_salary_home_tv.setText(formattedSalary + " VND");
+
+
+                                        // Exit loop after processing one entry (optional, depending on your requirement)
+                                        break;
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+                                Log.e(TAG, "Firebase Database Error: " + error.getMessage());
+                                Toast.makeText(getContext(), "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    } else {
+                        Toast.makeText(getContext(), "Shop not found", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Log.e(TAG, "Firebase Database Error: " + error.getMessage());
+                    Toast.makeText(getContext(), "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+
         }
     }
 
