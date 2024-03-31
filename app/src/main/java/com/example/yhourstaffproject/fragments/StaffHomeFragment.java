@@ -101,6 +101,7 @@ public class StaffHomeFragment extends Fragment {
         adapter = new TimekeeppingAdapter(timekeepingList);
         recyclerView.setAdapter(adapter);
         setupTimerButtonVisibilityListener();
+        getUsername();
         loadDataFromFirebase();
         dialog = new Dialog(getContext());
         dialog.setContentView(R.layout.custom_on_shift_dialog);
@@ -623,6 +624,36 @@ public class StaffHomeFragment extends Fragment {
                             time_date_tv.setText(datePart);
 
                         }
+                    } else {
+                        Toast.makeText(getContext(), "Data doesn't exist", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                }
+            });
+
+        } else {
+            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
+    public void getUsername(){
+        FirebaseUser user = mAuth.getCurrentUser();
+        String userId = user.getUid();
+        if (user != null) {
+            DatabaseReference userReference = firebaseDatabase.getReference("User").child(userId);
+
+
+            userReference.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        String name = snapshot.child("name").getValue(String.class);
+                        title_name_home_tv.setText("Hello, " + name);
                     } else {
                         Toast.makeText(getContext(), "Data doesn't exist", Toast.LENGTH_SHORT).show();
                     }
