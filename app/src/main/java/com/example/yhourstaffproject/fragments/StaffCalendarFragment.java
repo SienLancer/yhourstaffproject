@@ -3,9 +3,12 @@ package com.example.yhourstaffproject.fragments;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.ViewFlipper;
 
 import androidx.fragment.app.Fragment;
 
@@ -23,6 +26,7 @@ import com.google.firebase.database.ValueEventListener;
  */
 public class StaffCalendarFragment extends Fragment {
     private View mView;
+    ViewFlipper viewFlipper;
     Button view_timetable_btn, list_timetable_btn;
 
     FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
@@ -55,6 +59,48 @@ public class StaffCalendarFragment extends Fragment {
         mView = inflater.inflate(R.layout.fragment_staff_calendar, container, false);
         view_timetable_btn = mView.findViewById(R.id.view_timetable_btn);
         list_timetable_btn = mView.findViewById(R.id.list_timetable_btn);
+        viewFlipper = mView.findViewById(R.id.view_flipper);
+
+
+
+        viewFlipper.setOnTouchListener(new View.OnTouchListener() {
+            private float startX;
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        startX = event.getX();
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        float endX = event.getX();
+                        if (startX < endX) {
+                            // Vuốt sang phải
+                            viewFlipper.setInAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.slide_in_left_viewfliper));
+                            viewFlipper.setOutAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.slide_out_left_viewfliper));
+                            viewFlipper.showPrevious();
+                        } else if (startX > endX) {
+                            // Vuốt sang trái
+                            viewFlipper.setInAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.slide_in_right_viewfliper));
+                            viewFlipper.setOutAnimation(AnimationUtils.loadAnimation(getContext(), R.anim.slide_out_right_viewfliper));
+                            viewFlipper.showNext();
+                        }
+                        break;
+                }
+                return true;
+            }
+
+
+
+
+        });
+
+
+        viewFlipper.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                viewFlipper.showNext(); // Click để chuyển đến view tiếp theo
+            }
+        });
 
         list_timetable_btn.setOnClickListener(new View.OnClickListener() {
             @Override
