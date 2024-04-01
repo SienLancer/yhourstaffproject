@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 
+import com.bumptech.glide.Glide;
 import com.example.yhourstaffproject.R;
 import com.example.yhourstaffproject.activities.SignInForStaffActivity;
 import com.google.firebase.auth.FirebaseAuth;
@@ -84,7 +85,8 @@ public class StaffProfileFragment extends Fragment {
         }
 
         staff_email_tv.setText(email);
-        avatar_img.setImageURI(photoUrl);
+        //avatar_img.setImageURI(photoUrl);
+        Glide.with(getContext()).load(photoUrl).error(R.drawable.ava_de).into(avatar_img);
 
     }
 }

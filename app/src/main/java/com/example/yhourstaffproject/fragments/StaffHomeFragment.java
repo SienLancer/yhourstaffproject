@@ -79,7 +79,7 @@ public class StaffHomeFragment extends Fragment {
     private List<Timekeeping> timekeepingList = new ArrayList<>();
 
     TextView total_salary_imgv, title_name_home_tv, title_checkin_tv, time_hour_tv, time_date_tv;
-    TextView scan_txt, total_salary_home_tv;
+    TextView scan_txt, total_salary_home_tv, slogan_tv;
     Dialog dialog;
     Calendar currentTime;
     ImageView loading_imgv;
@@ -97,6 +97,7 @@ public class StaffHomeFragment extends Fragment {
         total_salary_imgv = mView.findViewById(R.id.total_salary_home_tv);
         title_name_home_tv = mView.findViewById(R.id.title_name_home_tv);
         total_salary_home_tv = mView.findViewById(R.id.total_salary_home_tv);
+        slogan_tv = mView.findViewById(R.id.slogan_tv);
         loadDialog();
         recyclerView = mView.findViewById(R.id.timekeeping_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -340,9 +341,11 @@ public class StaffHomeFragment extends Fragment {
                     int hour = now.getHour();
                     int minute = now.getMinute();
                     String minuteFormatted = String.format("%02d", minute);
+                    String dayFormatted = String.format("%02d", day);
+                    String monthFormatted = String.format("%02d", month);
 
                     String dateForTimeKeeping = day + " " + month + " " + year + " " + hour + ":" + minuteFormatted;
-                    String dateForCheckIn = day + "/" + month + "/" + year + " " + hour + ":" + minuteFormatted;
+                    String dateForCheckIn = dayFormatted + "/" + monthFormatted + "/" + year + " " + hour + ":" + minuteFormatted;
 
                     DatabaseReference userReference = firebaseDatabase.getReference("User").child(userId).child("timekeeping");
 
@@ -678,7 +681,7 @@ public class StaffHomeFragment extends Fragment {
                                         if (contents.equals(realtimeqr)){
                                             Toast.makeText(getContext(), "Check out successful!", Toast.LENGTH_SHORT).show();
                                             setDataForCheckout();
-                                            //totalCost();
+                                            totalCost();
                                             startActivity(new Intent(getActivity(), BottomTabActivity.class));
                                         }else {
                                             Toast.makeText(getContext(), "Scan failed!", Toast.LENGTH_SHORT).show();
@@ -724,8 +727,10 @@ public class StaffHomeFragment extends Fragment {
             int hour = now.getHour();
             int minute = now.getMinute();
             String minuteFormatted = String.format("%02d", minute);
+            String dayFormatted = String.format("%02d", day);
+            String monthFormatted = String.format("%02d", month);
 
-            String checkoutTime = day + "/" + month + "/" + year + " " + hour + ":" + minuteFormatted;
+            String checkoutTime = dayFormatted + "/" + monthFormatted + "/" + year + " " + hour + ":" + minuteFormatted;
 
             // Tạo một đối tượng chứa dữ liệu để đẩy lên Firebase
             Map<String, Object> checkoutData = new HashMap<>();
@@ -839,9 +844,11 @@ public class StaffHomeFragment extends Fragment {
 
     public void totalCost() {
         Calendar checkoutTime = Calendar.getInstance();
+        currentTime = Calendar.getInstance(); // Lấy thời gian hiện tại
          hourText = time_hour_tv.getText().toString();
          dateText = time_date_tv.getText().toString();
-         totalTime = dateText + " " + hourText;
+         totalTime = dateText+ " " +  hourText;
+        //slogan_tv.setText(totalTime);
         Log.d(TAG, "totalTime: " + totalTime);
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
         try {
