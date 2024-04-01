@@ -630,13 +630,6 @@ public class CalendarActivity extends AppCompatActivity {
 
 
     public void showDialog(){
-        //CustomDialogFragment a = (CustomDialogFragment) getTargetFragment();
-//        dialogFragment = new CustomDialogFragment();
-//        Bundle args = new Bundle();
-//        args.putString("title", "Enter a name to select a shift");
-//        dialogFragment.setArguments(args);
-//        dialogFragment.show(getChildFragmentManager(), "dialog");
-
 
         dialog.show();
 

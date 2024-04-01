@@ -2,6 +2,8 @@ package com.example.yhourstaffproject.fragments;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -20,6 +22,8 @@ import androidx.fragment.app.Fragment;
 import com.example.yhourstaffproject.R;
 import com.example.yhourstaffproject.activities.CalendarActivity;
 import com.example.yhourstaffproject.activities.WeekListActivity;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -88,7 +92,7 @@ public class StaffCalendarFragment extends Fragment {
         init();
 
         getDataTable();
-
+        itemClick();
         viewFlipper.setOnTouchListener(new View.OnTouchListener() {
             private float startX;
             @Override
@@ -355,8 +359,454 @@ public class StaffCalendarFragment extends Fragment {
         eveningSstart_sun = mView.findViewById(R.id.eveningSstart_sun);
         eveningSend_sun = mView.findViewById(R.id.eveningSend_sun);
 
+        dialog=new Dialog(getContext());
+        dialog.setContentView(R.layout.custom_popup_dialog);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+        ip_shift_et=dialog.findViewById(R.id.ip_shift_et);
+        add_shift_btn =dialog.findViewById(R.id.add_shift_btn);
+        cancel_btn =dialog.findViewById(R.id.cancel_btn);
+
 
     }
 
+
+    private void itemClick() {
+        Mon1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.show();
+
+            }
+        });
+        Mon2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.show();
+
+            }
+        });
+        Mon3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.show();
+
+            }
+        });
+        Tue1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.show();
+
+            }
+        });
+        Tue2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.show();
+
+            }
+        });
+        Tue3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.show();
+
+            }
+        });
+        Wed1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.show();
+
+            }
+        });
+        Wed2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.show();
+
+            }
+        });
+        Wed3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.show();
+
+            }
+        });
+        Thu1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.show();
+
+            }
+        });
+        Thu2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.show();
+
+            }
+        });
+        Thu3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.show();
+
+            }
+        });
+        Fri1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.show();
+
+            }
+        });
+        Fri2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.show();
+                ip_shift_et.setText(Fri2.getText().toString());
+
+            }
+        });
+        Fri3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.show();
+
+            }
+        });
+        Sat1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.show();
+
+            }
+        });
+        Sat2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.show();
+
+            }
+        });
+        Sat3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.show();
+            }
+        });
+        Sun1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.show();
+
+            }
+        });
+        Sun2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.show();
+
+            }
+        });
+
+        Sun3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Hiển thị dialog để nhập dữ liệu
+                dialog.show();
+                ip_shift_et.setText(Sun3.getText().toString());
+
+                // Xử lý sự kiện khi người dùng nhấn vào nút add_shift_btn trong dialog
+                add_shift_btn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        if (user != null) {
+                            String userId = user.getUid();
+                            String dataItem = ip_shift_et.getText().toString();
+                            DatabaseReference userRef = firebaseDatabase.getReference().child("User").child(userId).child("shopID");
+                            userRef.addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    String ownerShopId = snapshot.getValue(String.class);
+                                    if (ownerShopId != null) {
+                                        DatabaseReference shopRef = firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("Calendar");
+
+                                        shopRef.addValueEventListener(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                                                // Lấy tất cả các tuần
+                                                Iterable<DataSnapshot> weeks = dataSnapshot.getChildren();
+                                                DataSnapshot lastWeekSnapshot = null;
+
+                                                // Lặp qua tất cả các tuần và lưu lại tuần cuối cùng
+                                                for (DataSnapshot weekSnapshot : weeks) {
+                                                    lastWeekSnapshot = weekSnapshot;
+                                                }
+
+                                                if (lastWeekSnapshot != null) {
+                                                    // Cập nhật dữ liệu của Sun3 trong tuần cuối cùng
+                                                    DatabaseReference sun3Ref = lastWeekSnapshot.child("sun3").getRef();
+                                                    sun3Ref.setValue(dataItem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                        @Override
+                                                        public void onComplete(@NonNull Task<Void> task) {
+                                                            if (task.isSuccessful()) {
+                                                                dialog.dismiss();
+                                                                Toast.makeText(getContext(), "Added Successfully", Toast.LENGTH_SHORT).show();
+                                                                Sun3.setText(dataItem);
+                                                            } else {
+                                                                Toast.makeText(getContext(), "Failed to add data", Toast.LENGTH_SHORT).show();
+                                                            }
+                                                        }
+                                                    });
+                                                } else {
+                                                    Toast.makeText(getContext(), "No weeks found", Toast.LENGTH_SHORT).show();
+                                                }
+                                            }
+
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError error) {
+                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
+                                    } else {
+                                        Toast.makeText(getContext(), "Shop ID not found for this user", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+                                    Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        } else {
+                            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+            }
+        });
+
+        morningSstart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.show();
+
+                add_shift_btn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        if (user != null) {
+                            listener = firebaseDatabase.getReference().addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    String userId = user.getUid();
+                                    String dataItem = ip_shift_et.getText().toString();
+                                    String ownerShopId = snapshot.child("User").child(userId).child("shopID").getValue(String.class);
+                                    firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("Calendar").child("week1").child("morningSstart").setValue(dataItem);
+                                    dialog.dismiss();
+                                    Toast.makeText(getContext(), "Added Successfully", Toast.LENGTH_SHORT).show();
+
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+                                    Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }else {
+                            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+                        }
+
+                    }
+                });
+            }
+        });
+
+        morningSend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.show();
+
+                add_shift_btn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        if (user != null) {
+                            listener = firebaseDatabase.getReference().addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    String userId = user.getUid();
+                                    String dataItem = ip_shift_et.getText().toString();
+                                    String ownerShopId = snapshot.child("User").child(userId).child("shopID").getValue(String.class);
+                                    firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("Calendar").child("week1").child("morningSend").setValue(dataItem);
+                                    dialog.dismiss();
+                                    Toast.makeText(getContext(), "Added Successfully", Toast.LENGTH_SHORT).show();
+
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+                                    Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }else {
+                            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+                        }
+
+                    }
+                });
+            }
+        });
+
+        afternoonSstart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.show();
+
+                add_shift_btn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        if (user != null) {
+                            listener = firebaseDatabase.getReference().addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    String userId = user.getUid();
+                                    String dataItem = ip_shift_et.getText().toString();
+                                    String ownerShopId = snapshot.child("User").child(userId).child("shopID").getValue(String.class);
+                                    firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("Calendar").child("week1").child("afternoonSstart").setValue(dataItem);
+                                    dialog.dismiss();
+                                    Toast.makeText(getContext(), "Added Successfully", Toast.LENGTH_SHORT).show();
+
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+                                    Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }else {
+                            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+                        }
+
+                    }
+                });
+            }
+        });
+
+        afternoonSend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.show();
+
+                add_shift_btn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        if (user != null) {
+                            listener = firebaseDatabase.getReference().addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    String userId = user.getUid();
+                                    String dataItem = ip_shift_et.getText().toString();
+                                    String ownerShopId = snapshot.child("User").child(userId).child("shopID").getValue(String.class);
+                                    firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("Calendar").child("week1").child("afternoonSend").setValue(dataItem);
+                                    dialog.dismiss();
+                                    Toast.makeText(getContext(), "Added Successfully", Toast.LENGTH_SHORT).show();
+
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+                                    Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }else {
+                            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+                        }
+
+                    }
+                });
+            }
+        });
+
+        eveningSstart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.show();
+
+                add_shift_btn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        if (user != null) {
+                            listener = firebaseDatabase.getReference().addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    String userId = user.getUid();
+                                    String dataItem = ip_shift_et.getText().toString();
+                                    String ownerShopId = snapshot.child("User").child(userId).child("shopID").getValue(String.class);
+                                    firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("Calendar").child("week1").child("eveningSstart").setValue(dataItem);
+                                    dialog.dismiss();
+                                    Toast.makeText(getContext(), "Added Successfully", Toast.LENGTH_SHORT).show();
+
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+                                    Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }else {
+                            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+                        }
+
+                    }
+                });
+            }
+        });
+
+        eveningSend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.show();
+
+                add_shift_btn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        if (user != null) {
+                            listener = firebaseDatabase.getReference().addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    String userId = user.getUid();
+                                    String dataItem = ip_shift_et.getText().toString();
+                                    String ownerShopId = snapshot.child("User").child(userId).child("shopID").getValue(String.class);
+                                    firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("Calendar").child("week1").child("eveningSend").setValue(dataItem);
+                                    dialog.dismiss();
+                                    Toast.makeText(getContext(), "Added Successfully", Toast.LENGTH_SHORT).show();
+
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+                                    Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }else {
+                            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+                        }
+
+                    }
+                });
+            }
+        });
+    }
 
 }
