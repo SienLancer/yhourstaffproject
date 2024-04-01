@@ -868,9 +868,65 @@ public class StaffHomeFragment extends Fragment {
         // Tính số tiền tương ứng
         double totalCost = Math.abs(totalHours) * 15000; // Sử dụng giá trị tuyệt đối của totalHours
 
+        updateSalaryWithTotalCost(totalCost);
+
         // Hiển thị số tiền lên giao diện người dùng
-        Toast.makeText(getContext(), String.format(Locale.getDefault(), "Total cost: %.0f VND", totalCost), Toast.LENGTH_SHORT).show();
+        //Toast.makeText(getContext(), String.format(Locale.getDefault(), "Total cost: %.0f VND", totalCost), Toast.LENGTH_SHORT).show();
     }
 
+    // Tính toán và cập nhật totalCost vào currentSalary trên cơ sở dữ liệu Firebase
+    public void updateSalaryWithTotalCost(double totalCost) {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user != null) {
+            String userId = user.getUid();
+            DatabaseReference userRef = firebaseDatabase.getReference("User");
+
+            userRef.child(userId).child("shopID").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    String ownerShopId = snapshot.getValue(String.class);
+                    if (ownerShopId != null) {
+                        userRef.child(userId).child("salary").addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                for (DataSnapshot salarySnapshot : snapshot.getChildren()) {
+                                    String status = salarySnapshot.child("status").getValue(String.class);
+                                    if (status != null && status.equals("Not paid yet")) {
+                                        // Only process data if status is "Not paid yet"
+
+                                        Integer currentSalary = salarySnapshot.child("currentSalary").getValue(Integer.class);
+
+                                        // Cộng totalCost vào currentSalary
+                                        int newSalary = currentSalary + (int) totalCost;
+
+                                        // Cập nhật currentSalary mới lên cơ sở dữ liệu
+                                        salarySnapshot.getRef().child("currentSalary").setValue(newSalary);
+
+                                        break;
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+                                Log.e(TAG, "Firebase Database Error: " + error.getMessage());
+                                Toast.makeText(getContext(), "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    } else {
+                        Toast.makeText(getContext(), "Shop not found", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Log.e(TAG, "Firebase Database Error: " + error.getMessage());
+                    Toast.makeText(getContext(), "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+        }
+    }
 
 }
