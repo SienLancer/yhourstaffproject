@@ -2,7 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:padding="10dp"
@@ -34,10 +34,11 @@
         app:layout_constraintTop_toBottomOf="@+id/title_dialog_tv" />
 
     <LinearLayout
-        android:layout_width="350dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="52dp"
         android:orientation="horizontal"
+        android:padding="5dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.491"
         app:layout_constraintStart_toStartOf="parent"
@@ -48,6 +49,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="5dp"
+            android:fontFamily="@font/roboto_bold"
+            android:textColor="@color/white"
+            android:background="@drawable/bg_signin_btn"
             android:layout_weight="1"
             android:text="Cancel"
 
@@ -58,6 +62,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="5dp"
+            android:fontFamily="@font/roboto_bold"
+            android:textColor="@color/white"
+            android:background="@drawable/bg_signin_btn"
             android:layout_weight="1"
             android:text="Add" />
 
