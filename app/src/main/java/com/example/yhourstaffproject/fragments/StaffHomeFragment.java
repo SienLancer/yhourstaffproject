@@ -228,9 +228,27 @@ public class StaffHomeFragment extends Fragment {
         //dialog.getWindow().setWindowAnimations(R.style.RotateAnimation);
         loadDialog.getWindow().setLayout(130, 130);
         loadDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+        // Load animation
         animation = AnimationUtils.loadAnimation(getContext(), R.anim.rotate_animation);
+        // Set listener to restart animation when it ends
+        animation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {}
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                // Restart animation when it ends
+                loading_imgv.startAnimation(animation);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {}
+        });
+        // Start animation
         loading_imgv.startAnimation(animation);
     }
+
 
     private void setResult(String contents) {
         FirebaseUser user = mAuth.getCurrentUser();
