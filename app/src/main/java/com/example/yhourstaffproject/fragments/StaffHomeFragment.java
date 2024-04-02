@@ -2,6 +2,8 @@ package com.example.yhourstaffproject.fragments;
 
 import static android.content.ContentValues.TAG;
 
+import static androidx.core.content.ContextCompat.getSystemService;
+
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -10,7 +12,10 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Base64;
 import android.util.Log;
 import android.view.Gravity;
@@ -40,6 +45,7 @@ import com.example.yhourstaffproject.activities.BottomTabActivity;
 import com.example.yhourstaffproject.activities.SalaryActivity;
 import com.example.yhourstaffproject.adapter.TimekeeppingAdapter;
 import com.example.yhourstaffproject.object.Timekeeping;
+import com.example.yhourstaffproject.utility.NetworkUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -75,12 +81,15 @@ public class StaffHomeFragment extends Fragment {
     ImageButton checkout_btn;
     private RecyclerView recyclerView;
     private TimekeeppingAdapter adapter;
+    private Handler handler = new Handler();
+    private Runnable runnable;
     String hourText, dateText, totalTime;
     private List<Timekeeping> timekeepingList = new ArrayList<>();
+    Button network_dialog_btn;
 
     TextView total_salary_imgv, title_name_home_tv, title_checkin_tv, time_hour_tv, time_date_tv;
     TextView scan_txt, total_salary_home_tv, slogan_tv;
-    Dialog dialog;
+    Dialog dialog, networkDialog;
     Calendar currentTime;
     ImageView loading_imgv;
     AlertDialog loadDialog;
@@ -114,6 +123,16 @@ public class StaffHomeFragment extends Fragment {
         time_hour_tv = dialog.findViewById(R.id.time_hour_tv);
         time_date_tv = dialog.findViewById(R.id.time_date_tv);
         checkout_btn = dialog.findViewById(R.id.checkout_btn);
+        networkDialog();
+        checkNetworkPeriodically();
+
+
+        network_dialog_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                networkDialog.dismiss();
+            }
+        });
 
         title_name_home_tv.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -159,6 +178,8 @@ public class StaffHomeFragment extends Fragment {
 
         return mView;
     }
+
+
     private ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted ->{
                if (isGranted){
@@ -216,6 +237,26 @@ public class StaffHomeFragment extends Fragment {
         }
     });
 
+
+    public void networkDialog(){
+        networkDialog = new Dialog(getContext());
+        networkDialog.setContentView(R.layout.custom_network_dialog);
+        networkDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        network_dialog_btn = networkDialog.findViewById(R.id.network_dialog_btn);
+    }
+
+    private void checkNetworkPeriodically() {
+        runnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!NetworkUtils.isNetworkAvailable(getContext())) {
+                    networkDialog.show();
+                }
+                handler.postDelayed(this, 5000); // Lặp lại sau mỗi 5 giây
+            }
+        };
+        handler.post(runnable);
+    }
 
     public void loadDialog(){
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
