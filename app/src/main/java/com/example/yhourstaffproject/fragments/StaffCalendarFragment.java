@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -131,6 +132,12 @@ public class StaffCalendarFragment extends Fragment {
 
         });
 
+        cancel_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
 
         network_dialog_btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -614,18 +621,25 @@ public class StaffCalendarFragment extends Fragment {
                                                 if (lastWeekSnapshot != null) {
                                                     // Cập nhật dữ liệu của Sun3 trong tuần cuối cùng
                                                     DatabaseReference sun3Ref = lastWeekSnapshot.child("sun3").getRef();
-                                                    sun3Ref.setValue(dataItem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                        @Override
-                                                        public void onComplete(@NonNull Task<Void> task) {
-                                                            if (task.isSuccessful()) {
-                                                                dialog.dismiss();
-                                                                Toast.makeText(getContext(), "Added Successfully", Toast.LENGTH_SHORT).show();
-                                                                Sun3.setText(dataItem);
-                                                            } else {
-                                                                Toast.makeText(getContext(), "Failed to add data", Toast.LENGTH_SHORT).show();
+                                                    String statusRef = lastWeekSnapshot.child("status").getValue(String.class);
+
+                                                    if (statusRef != null && statusRef.equals("Opening")){
+                                                        sun3Ref.setValue(dataItem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                            @Override
+                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                if (task.isSuccessful()) {
+                                                                    dialog.dismiss();
+                                                                    Toast.makeText(getContext(), "Added Successfully", Toast.LENGTH_SHORT).show();
+                                                                    Sun3.setText(dataItem);
+                                                                } else {
+                                                                    Toast.makeText(getContext(), "Failed to add data", Toast.LENGTH_SHORT).show();
+                                                                }
                                                             }
-                                                        }
-                                                    });
+                                                        });
+                                                    }else {
+                                                        Toast.makeText(getContext(), "Timetable is closed", Toast.LENGTH_SHORT).show();
+                                                    }
+
                                                 } else {
                                                     Toast.makeText(getContext(), "No weeks found", Toast.LENGTH_SHORT).show();
                                                 }
