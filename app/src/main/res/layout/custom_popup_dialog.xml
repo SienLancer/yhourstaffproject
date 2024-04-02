@@ -6,7 +6,6 @@
     android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:padding="10dp"
-    android:layout_marginHorizontal="30dp"
     android:background="@drawable/item_week_view_bg"
     >
 
@@ -18,17 +17,22 @@
         android:text="Enter a name to select a shift"
         android:fontFamily="@font/roboto_bold"
         android:textColor="@color/white"
-        android:textSize="16sp"
+        android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
         android:id="@+id/ip_shift_et"
-        android:layout_width="250dp"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
         android:layout_marginTop="40dp"
         android:textColor="@color/white"
+        android:paddingHorizontal="20dp"
+        android:hint="Enter a name to select a shift"
+        android:background="@drawable/bg_signin_edt"
+        android:fontFamily="@font/roboto_light_italic"
+        android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/title_dialog_tv" />
