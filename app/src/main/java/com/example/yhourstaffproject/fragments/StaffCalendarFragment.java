@@ -1,17 +1,22 @@
 package com.example.yhourstaffproject.fragments;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
@@ -22,6 +27,7 @@ import androidx.fragment.app.Fragment;
 import com.example.yhourstaffproject.R;
 import com.example.yhourstaffproject.activities.CalendarActivity;
 import com.example.yhourstaffproject.activities.WeekListActivity;
+import com.example.yhourstaffproject.utility.NetworkUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -32,19 +38,20 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link StaffCalendarFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+
 public class StaffCalendarFragment extends Fragment {
     private View mView;
     ViewFlipper viewFlipper;
     TextView start_end_date_tv;
-    Button view_timetable_btn, list_timetable_btn;
+    Button view_timetable_btn, list_timetable_btn, network_dialog_btn;
     EditText ip_shift_et;
     Button add_shift_btn,cancel_btn;
-    Dialog dialog;
+    Dialog dialog, networkDialog;
+    ImageView loading_imgv;
+    AlertDialog loadDialog;
+    Animation animation;
+    private Handler handler = new Handler();
+    private Runnable runnable;
     FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
     ValueEventListener listener;
@@ -90,6 +97,8 @@ public class StaffCalendarFragment extends Fragment {
                              Bundle savedInstanceState) {
         mView = inflater.inflate(R.layout.fragment_staff_calendar, container, false);
         init();
+        checkNetworkPeriodically(getContext());
+        loadDialog();
 
         getDataTable();
         itemClick();
@@ -119,18 +128,10 @@ public class StaffCalendarFragment extends Fragment {
                 return true;
             }
 
-
-
-
         });
 
 
-        viewFlipper.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                viewFlipper.showNext(); // Click để chuyển đến view tiếp theo
-            }
-        });
+
 
         list_timetable_btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -150,13 +151,11 @@ public class StaffCalendarFragment extends Fragment {
 
 
 
-
-
-
         return mView;
     }
 
     public void getDataTable(){
+        loadDialog.show();
         FirebaseUser user = mAuth.getCurrentUser();
         if (user != null) {
             String userId = user.getUid();
@@ -180,6 +179,7 @@ public class StaffCalendarFragment extends Fragment {
                                 }
 
                                 if (lastWeekSnapshot != null) {
+                                    loadDialog.dismiss();
                                     // Hiển thị dữ liệu từ tuần cuối cùng lên giao diện người dùng
                                     // Lấy dữ liệu từ tuần cuối cùng và hiển thị lên giao diện
                                     start_end_date_tv.setText(lastWeekSnapshot.child("startDay").getValue(String.class) + " - " + lastWeekSnapshot.child("endDay").getValue(String.class));
@@ -247,6 +247,7 @@ public class StaffCalendarFragment extends Fragment {
                                     afternoonSend_sun.setText(lastWeekSnapshot.child("afternoonSend").getValue(String.class));
                                     eveningSstart_sun.setText(lastWeekSnapshot.child("eveningSStart").getValue(String.class));
                                     eveningSend_sun.setText(lastWeekSnapshot.child("eveningSend").getValue(String.class));
+
 
                                     // Tiếp tục với các TextView khác tương tự
                                     // ...
@@ -367,9 +368,60 @@ public class StaffCalendarFragment extends Fragment {
         add_shift_btn =dialog.findViewById(R.id.add_shift_btn);
         cancel_btn =dialog.findViewById(R.id.cancel_btn);
 
+        networkDialog = new Dialog(getContext());
+        networkDialog.setContentView(R.layout.custom_network_dialog);
+        networkDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        network_dialog_btn = networkDialog.findViewById(R.id.network_dialog_btn);
+
 
     }
 
+    private void checkNetworkPeriodically(Context context) {
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (!NetworkUtils.isNetworkAvailable(context)) {
+                    networkDialog.show();
+                }else {
+                    networkDialog.dismiss();
+                    Toast.makeText(context, "Network available", Toast.LENGTH_SHORT).show();
+                }
+                handler.postDelayed(this, 10000); // Lặp lại sau mỗi 5 giây
+            }
+        }, 10000); // Lặp lại sau mỗi 5 giây
+    }
+
+    public void loadDialog(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setCancelable(false); // Tùy chỉnh tùy theo nhu cầu của bạn
+        View view = getLayoutInflater().inflate(R.layout.custom_loading_dialog, null);
+        loading_imgv = view.findViewById(R.id.loading_imgv);
+
+        builder.setView(view);
+        loadDialog = builder.create();
+        //dialog.getWindow().setWindowAnimations(R.style.RotateAnimation);
+        loadDialog.getWindow().setLayout(130, 130);
+        loadDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+        // Load animation
+        animation = AnimationUtils.loadAnimation(getContext(), R.anim.rotate_animation);
+        // Set listener to restart animation when it ends
+        animation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {}
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                // Restart animation when it ends
+                loading_imgv.startAnimation(animation);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {}
+        });
+        // Start animation
+        loading_imgv.startAnimation(animation);
+    }
 
     private void itemClick() {
         Mon1.setOnClickListener(new View.OnClickListener() {

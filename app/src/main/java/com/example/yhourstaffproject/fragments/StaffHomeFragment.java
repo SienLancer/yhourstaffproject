@@ -116,6 +116,7 @@ public class StaffHomeFragment extends Fragment {
         getUsername();
         loadDataSalary();
         loadDataFromFirebase();
+
         dialog = new Dialog(getContext());
         dialog.setContentView(R.layout.custom_on_shift_dialog);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -124,7 +125,7 @@ public class StaffHomeFragment extends Fragment {
         time_date_tv = dialog.findViewById(R.id.time_date_tv);
         checkout_btn = dialog.findViewById(R.id.checkout_btn);
         networkDialog();
-        checkNetworkPeriodically();
+        checkNetworkPeriodically(getContext());
 
 
         network_dialog_btn.setOnClickListener(new View.OnClickListener() {
@@ -245,17 +246,19 @@ public class StaffHomeFragment extends Fragment {
         network_dialog_btn = networkDialog.findViewById(R.id.network_dialog_btn);
     }
 
-    private void checkNetworkPeriodically() {
-        runnable = new Runnable() {
+    private void checkNetworkPeriodically(Context context) {
+        handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                if (!NetworkUtils.isNetworkAvailable(getContext())) {
+                if (!NetworkUtils.isNetworkAvailable(context)) {
                     networkDialog.show();
+                }else {
+                    networkDialog.dismiss();
+                    Toast.makeText(getContext(), "Network available", Toast.LENGTH_SHORT).show();
                 }
-                handler.postDelayed(this, 5000); // Lặp lại sau mỗi 5 giây
+                handler.postDelayed(this, 10000); // Lặp lại sau mỗi 5 giây
             }
-        };
-        handler.post(runnable);
+        }, 10000); // Lặp lại sau mỗi 5 giây
     }
 
     public void loadDialog(){
