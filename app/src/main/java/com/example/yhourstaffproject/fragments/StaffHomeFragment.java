@@ -247,18 +247,22 @@ public class StaffHomeFragment extends Fragment {
     }
 
     private void checkNetworkPeriodically(Context context) {
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (!NetworkUtils.isNetworkAvailable(context)) {
-                    networkDialog.show();
-                }else {
-                    networkDialog.dismiss();
-                    Toast.makeText(getContext(), "Network available", Toast.LENGTH_SHORT).show();
+        if (!NetworkUtils.isNetworkAvailable(context)) {
+            networkDialog.show();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if (!NetworkUtils.isNetworkAvailable(context)) {
+                        networkDialog.show();
+                    }else {
+                        networkDialog.dismiss();
+                        Toast.makeText(getContext(), "Network available", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    handler.postDelayed(this, 7000); // Lặp lại sau mỗi 5 giây
                 }
-                handler.postDelayed(this, 10000); // Lặp lại sau mỗi 5 giây
-            }
-        }, 10000); // Lặp lại sau mỗi 5 giây
+            }, 7000); // Lặp lại sau mỗi 5 giây
+        }
     }
 
     public void loadDialog(){

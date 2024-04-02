@@ -97,11 +97,12 @@ public class StaffCalendarFragment extends Fragment {
                              Bundle savedInstanceState) {
         mView = inflater.inflate(R.layout.fragment_staff_calendar, container, false);
         init();
-        checkNetworkPeriodically(getContext());
+
         loadDialog();
 
         getDataTable();
         itemClick();
+        checkNetworkPeriodically(getContext());
         viewFlipper.setOnTouchListener(new View.OnTouchListener() {
             private float startX;
             @Override
@@ -131,7 +132,12 @@ public class StaffCalendarFragment extends Fragment {
         });
 
 
-
+        network_dialog_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                networkDialog.dismiss();
+            }
+        });
 
         list_timetable_btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -377,18 +383,22 @@ public class StaffCalendarFragment extends Fragment {
     }
 
     private void checkNetworkPeriodically(Context context) {
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (!NetworkUtils.isNetworkAvailable(context)) {
-                    networkDialog.show();
-                }else {
-                    networkDialog.dismiss();
-                    Toast.makeText(context, "Network available", Toast.LENGTH_SHORT).show();
+        if (!NetworkUtils.isNetworkAvailable(context)) {
+            networkDialog.show();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if (!NetworkUtils.isNetworkAvailable(context)) {
+                        networkDialog.show();
+                    }else {
+                        networkDialog.dismiss();
+                        Toast.makeText(getContext(), "Network available", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    handler.postDelayed(this, 7000); // Lặp lại sau mỗi 5 giây
                 }
-                handler.postDelayed(this, 10000); // Lặp lại sau mỗi 5 giây
-            }
-        }, 10000); // Lặp lại sau mỗi 5 giây
+            }, 7000); // Lặp lại sau mỗi 5 giây
+        }
     }
 
     public void loadDialog(){
