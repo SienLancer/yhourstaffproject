@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -23,6 +24,7 @@ import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.yhourstaffproject.R;
@@ -43,7 +45,7 @@ import com.google.firebase.database.ValueEventListener;
 public class StaffCalendarFragment extends Fragment {
     private View mView;
     ViewFlipper viewFlipper;
-    TextView start_end_date_tv;
+    TextView start_end_date_tv, status_closed_tv;
     Button view_timetable_btn, list_timetable_btn, network_dialog_btn;
     EditText ip_shift_et;
     Button add_shift_btn,cancel_btn;
@@ -170,6 +172,8 @@ public class StaffCalendarFragment extends Fragment {
     public void getDataTable(){
         loadDialog.show();
         FirebaseUser user = mAuth.getCurrentUser();
+        int colorOpening = ContextCompat.getColor(getContext(), R.color.green);
+        int colorClosed = ContextCompat.getColor(getContext(), R.color.red);
         if (user != null) {
             String userId = user.getUid();
             DatabaseReference userRef = firebaseDatabase.getReference().child("User").child(userId).child("shopID");
@@ -195,7 +199,17 @@ public class StaffCalendarFragment extends Fragment {
                                     loadDialog.dismiss();
                                     // Hiển thị dữ liệu từ tuần cuối cùng lên giao diện người dùng
                                     // Lấy dữ liệu từ tuần cuối cùng và hiển thị lên giao diện
+
+                                    String status = lastWeekSnapshot.child("status").getValue(String.class);
+                                    if (status != null && status.equals("Opening")){
+                                        status_closed_tv.setText(status);
+                                        status_closed_tv.setTextColor(colorOpening);
+                                    }else if(status != null && status.equals("Closed")){
+                                        status_closed_tv.setText(status);
+                                        status_closed_tv.setTextColor(colorClosed);
+                                    }
                                     start_end_date_tv.setText(lastWeekSnapshot.child("startDay").getValue(String.class) + " - " + lastWeekSnapshot.child("endDay").getValue(String.class));
+
                                     Mon1.setText(lastWeekSnapshot.child("mon1").getValue(String.class));
                                     Mon2.setText(lastWeekSnapshot.child("mon2").getValue(String.class));
                                     Mon3.setText(lastWeekSnapshot.child("mon3").getValue(String.class));
@@ -294,6 +308,7 @@ public class StaffCalendarFragment extends Fragment {
         list_timetable_btn = mView.findViewById(R.id.list_timetable_btn);
         viewFlipper = mView.findViewById(R.id.view_flipper);
         start_end_date_tv = mView.findViewById(R.id.start_end_date_tv);
+        status_closed_tv = mView.findViewById(R.id.status_closed_tv);
 
 
         Mon1=mView.findViewById(R.id.Monday1);

@@ -40,6 +40,18 @@
         android:layout_gravity="center"
         android:text="TextView" />
 
+    <TextView
+        android:id="@+id/status_closed_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:fontFamily="@font/roboto_bold"
+        android:text="TextView"
+        android:textAllCaps="true"
+        android:textColor="#000000"
+        android:textSize="12sp" />
+
     <ViewFlipper
         android:id="@+id/view_flipper"
         android:layout_width="match_parent"
