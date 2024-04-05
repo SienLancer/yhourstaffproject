@@ -78,18 +78,18 @@ import java.util.Map;
 public class StaffHomeFragment extends Fragment {
     private View mView;
     ImageButton scanQr_imgBtn, on_shift_imgBtn;
-    ImageButton checkout_btn;
+    ImageButton checkout_btn, cancel_shift_btn;
     private RecyclerView recyclerView;
     private TimekeeppingAdapter adapter;
     private Handler handler = new Handler();
     private Runnable runnable;
     String hourText, dateText, totalTime;
     private List<Timekeeping> timekeepingList = new ArrayList<>();
-    Button network_dialog_btn;
+    Button network_dialog_btn, button_yes, button_no;
 
     TextView total_salary_imgv, title_name_home_tv, title_checkin_tv, time_hour_tv, time_date_tv;
-    TextView scan_txt, total_salary_home_tv, slogan_tv;
-    Dialog dialog, networkDialog;
+    TextView scan_txt, total_salary_home_tv, slogan_tv, dialog_title, dialog_message;
+    Dialog dialog, networkDialog, yesNoDialog;
     Calendar currentTime;
     ImageView loading_imgv;
     AlertDialog loadDialog;
@@ -100,31 +100,12 @@ public class StaffHomeFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         mView =inflater.inflate(R.layout.fragment_staff_home, container, false);
-        scanQr_imgBtn = mView.findViewById(R.id.scanQr_imgBtn);
-        scan_txt = mView.findViewById(R.id.scan_txt);
-        on_shift_imgBtn = mView.findViewById(R.id.on_shift_imgBtn);
-        total_salary_imgv = mView.findViewById(R.id.total_salary_home_tv);
-        title_name_home_tv = mView.findViewById(R.id.title_name_home_tv);
-        total_salary_home_tv = mView.findViewById(R.id.total_salary_home_tv);
-        slogan_tv = mView.findViewById(R.id.slogan_tv);
+        init();
         loadDialog();
-        recyclerView = mView.findViewById(R.id.timekeeping_recycler_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new TimekeeppingAdapter(timekeepingList);
-        recyclerView.setAdapter(adapter);
         setupTimerButtonVisibilityListener();
         getUsername();
         loadDataSalary();
         loadDataFromFirebase();
-
-        dialog = new Dialog(getContext());
-        dialog.setContentView(R.layout.custom_on_shift_dialog);
-        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        title_checkin_tv = dialog.findViewById(R.id.title_checkin_tv);
-        time_hour_tv = dialog.findViewById(R.id.time_hour_tv);
-        time_date_tv = dialog.findViewById(R.id.time_date_tv);
-        checkout_btn = dialog.findViewById(R.id.checkout_btn);
-        networkDialog();
         checkNetworkPeriodically(getContext());
 
 
@@ -135,10 +116,27 @@ public class StaffHomeFragment extends Fragment {
             }
         });
 
-        title_name_home_tv.setOnClickListener(new View.OnClickListener() {
+        cancel_shift_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                dialogAnimation();
+                dialog_title.setText("Cancel shift");
+                dialog_message.setText("Are you sure you want to cancel your shift?");
+                yesNoDialog.show();
+
+            }
+        });
+
+        button_yes.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                cancelShift();
+            }
+        });
+
+        button_no.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                yesNoDialog.dismiss();
             }
         });
 
@@ -238,13 +236,46 @@ public class StaffHomeFragment extends Fragment {
         }
     });
 
+    public void init(){
+        scanQr_imgBtn = mView.findViewById(R.id.scanQr_imgBtn);
+        scan_txt = mView.findViewById(R.id.scan_txt);
+        on_shift_imgBtn = mView.findViewById(R.id.on_shift_imgBtn);
+        total_salary_imgv = mView.findViewById(R.id.total_salary_home_tv);
+        title_name_home_tv = mView.findViewById(R.id.title_name_home_tv);
+        total_salary_home_tv = mView.findViewById(R.id.total_salary_home_tv);
+        slogan_tv = mView.findViewById(R.id.slogan_tv);
 
-    public void networkDialog(){
+
+        recyclerView = mView.findViewById(R.id.timekeeping_recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        adapter = new TimekeeppingAdapter(timekeepingList);
+        recyclerView.setAdapter(adapter);
+
+
+        dialog = new Dialog(getContext());
+        dialog.setContentView(R.layout.custom_on_shift_dialog);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        title_checkin_tv = dialog.findViewById(R.id.title_checkin_tv);
+        time_hour_tv = dialog.findViewById(R.id.time_hour_tv);
+        time_date_tv = dialog.findViewById(R.id.time_date_tv);
+        checkout_btn = dialog.findViewById(R.id.checkout_btn);
+        cancel_shift_btn = dialog.findViewById(R.id.cancel_shift_btn);
+
+        yesNoDialog=new Dialog(getContext());
+        yesNoDialog.setContentView(R.layout.custom_yes_no_dialog);
+        yesNoDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+        button_yes = yesNoDialog.findViewById(R.id.button_yes);
+        button_no = yesNoDialog.findViewById(R.id.button_no);
+        dialog_title = yesNoDialog.findViewById(R.id.dialog_title);
+        dialog_message = yesNoDialog.findViewById(R.id.dialog_message);
+
         networkDialog = new Dialog(getContext());
         networkDialog.setContentView(R.layout.custom_network_dialog);
         networkDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         network_dialog_btn = networkDialog.findViewById(R.id.network_dialog_btn);
     }
+
 
     private void checkNetworkPeriodically(Context context) {
         if (!NetworkUtils.isNetworkAvailable(context)) {
@@ -1028,6 +1059,61 @@ public class StaffHomeFragment extends Fragment {
                     Toast.makeText(getContext(), "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             });
+        } else {
+            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void cancelShift(){
+        FirebaseUser user = mAuth.getCurrentUser();
+        String userId = user.getUid();
+        if (user != null) {
+            DatabaseReference userReference = firebaseDatabase.getReference("User").
+                    child(userId).child("timekeeping");
+
+            // Thực hiện truy vấn để lấy mục cuối cùng
+            Query query = userReference.orderByChild("timestamp").limitToLast(1);
+
+            query.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists()) {
+                        // Lặp qua kết quả (thoả mãn chỉ có 1 mục) để xóa
+                        for (DataSnapshot childSnapshot : snapshot.getChildren()) {
+                            String lastKey = childSnapshot.getKey();
+
+                            // Xóa mục cuối cùng
+                            userReference.child(lastKey).removeValue()
+                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+                                            // Thành công
+                                            dialog.dismiss();
+                                            yesNoDialog.dismiss();
+                                            Toast.makeText(getContext(), "Last timekeeping removed successfully", Toast.LENGTH_SHORT).show();
+                                        }
+                                    })
+                                    .addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            // Lỗi xảy ra
+                                            Toast.makeText(getContext(), "Failed to remove last timekeeping", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                        }
+                    } else {
+                        // Không tìm thấy dữ liệu
+                        Toast.makeText(getContext(), "No timekeeping data found", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    // Lỗi xảy ra
+                    Toast.makeText(getContext(), "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+
         } else {
             Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
         }
