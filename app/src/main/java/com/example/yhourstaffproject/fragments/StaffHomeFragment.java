@@ -189,50 +189,54 @@ public class StaffHomeFragment extends Fragment {
             });
 
     private ActivityResultLauncher<ScanOptions> qrCodeLauncher = registerForActivityResult(new ScanContract(), result -> {
-        if (result.getContents() == null) {
-            Toast.makeText(getContext(), "Cancelled", Toast.LENGTH_SHORT).show();
-        } else {
-            FirebaseUser user = mAuth.getCurrentUser();
-            if (user != null) {
-                String userId = user.getUid();
-                DatabaseReference userReference = firebaseDatabase.getReference("User").child(userId).child("timekeeping");
-
-                Query query = userReference.orderByChild("timestamp").limitToLast(1);
-
-                query.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if (snapshot.exists()) {
-                            boolean checkoutExists = false;
-                            // Kiểm tra nếu có ít nhất một mục có trường checkout không rỗng
-                            for (DataSnapshot childSnapshot : snapshot.getChildren()) {
-                                String checkoutTime = childSnapshot.child("checkOut").getValue(String.class);
-                                if (checkoutTime != null && !checkoutTime.isEmpty()) {
-                                    checkoutExists = true;
-                                    break;
-                                }
-                            }
-                            // Cập nhật giao diện dựa trên tồn tại của checkout
-                            if (checkoutExists) { //checkout tồn tại
-                                setResult(result.getContents());
-                            } else { // checkout không tồn tại
-                                handleQRCodeResult(result.getContents());
-                            }
-                        } else {
-                            // Không có dữ liệu, hiển thị nút Timer
-                            on_shift_imgBtn.setVisibility(View.VISIBLE);
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-                        // Xử lý lỗi nếu có
-                        Toast.makeText(getContext(), "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                });
+        try {
+            if (result.getContents() == null) {
+                Toast.makeText(getContext(), "Cancelled", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+                FirebaseUser user = mAuth.getCurrentUser();
+                if (user != null) {
+                    String userId = user.getUid();
+                    DatabaseReference userReference = firebaseDatabase.getReference("User").child(userId).child("timekeeping");
+
+                    Query query = userReference.orderByChild("timestamp").limitToLast(1);
+
+                    query.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if (snapshot.exists()) {
+                                boolean checkoutExists = false;
+                                // Kiểm tra nếu có ít nhất một mục có trường checkout không rỗng
+                                for (DataSnapshot childSnapshot : snapshot.getChildren()) {
+                                    String checkoutTime = childSnapshot.child("checkOut").getValue(String.class);
+                                    if (checkoutTime != null && !checkoutTime.isEmpty()) {
+                                        checkoutExists = true;
+                                        break;
+                                    }
+                                }
+                                // Cập nhật giao diện dựa trên tồn tại của checkout
+                                if (checkoutExists) { //checkout tồn tại
+                                    setResult(result.getContents());
+                                } else { // checkout không tồn tại
+                                    handleQRCodeResult(result.getContents());
+                                }
+                            } else {
+                                // Không có dữ liệu, hiển thị nút Timer
+                                on_shift_imgBtn.setVisibility(View.VISIBLE);
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            // Xử lý lỗi nếu có
+                            Toast.makeText(getContext(), "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } else {
+                    Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+                }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     });
 
@@ -330,48 +334,58 @@ public class StaffHomeFragment extends Fragment {
 
 
     private void setResult(String contents) {
-        FirebaseUser user = mAuth.getCurrentUser();
-        String userId = user.getUid();
-        if (user != null) {
-            firebaseDatabase.getReference().addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    String ownerShopId = snapshot.child("User").child(userId).child("shopID").getValue(String.class);
-                    if(ownerShopId != null){
-                        firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("QRCode").child("codeScan")
-                                .addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                        String realtimeqr = snapshot.getValue(String.class);
-                                        if (contents.equals(realtimeqr)){
-                                            Toast.makeText(getContext(), "Scan successful!", Toast.LENGTH_SHORT).show();
-                                            addDataTimeKeeping();
-//                                            startActivity(new Intent(getActivity(), TimerActivity.class));
+        try {
+            FirebaseUser user = mAuth.getCurrentUser();
+            String userId = user.getUid();
+            if (user != null) {
+                firebaseDatabase.getReference().addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        try {
+                            String ownerShopId = snapshot.child("User").child(userId).child("shopID").getValue(String.class);
+                            if (ownerShopId != null) {
+                                firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("QRCode").child("codeScan")
+                                        .addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                try {
+                                                    String realtimeqr = snapshot.getValue(String.class);
+                                                    if (contents.equals(realtimeqr)) {
+                                                        Toast.makeText(getContext(), "Scan successful!", Toast.LENGTH_SHORT).show();
+                                                        addDataTimeKeeping();
+//                                                  startActivity(new Intent(getActivity(), TimerActivity.class));
 
-                                        }else {
-                                            Toast.makeText(getContext(), "Scan failed!", Toast.LENGTH_SHORT).show();
-                                        }
+                                                    } else {
+                                                        Toast.makeText(getContext(), "Scan failed!", Toast.LENGTH_SHORT).show();
+                                                    }
+                                                } catch (Exception e) {
+                                                    e.printStackTrace();
+                                                }
+                                            }
 
-                                    }
-
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError error) {
-
-                                    }
-                                });
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError error) {
+                                                // Handle onCancelled event
+                                            }
+                                        });
+                            } else {
+                                Toast.makeText(getContext(), "Shop not found", Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
-                    else {
-                        Toast.makeText(getContext(), "Shop not found", Toast.LENGTH_SHORT).show();
-                    }
-                }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }else {
-            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        // Handle onCancelled event
+                    }
+                });
+            } else {
+                Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -424,252 +438,289 @@ public class StaffHomeFragment extends Fragment {
 
 
     public void addDataTimeKeeping() {
-        FirebaseUser user = mAuth.getCurrentUser();
-        String userId = user.getUid();
-        long timestamp = System.currentTimeMillis();
-        if (user != null) {
-            firebaseDatabase.getReference().addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    LocalDateTime now = LocalDateTime.now();
-                    int year = now.getYear();
-                    int month = now.getMonthValue();
-                    int day = now.getDayOfMonth();
-                    int hour = now.getHour();
-                    int minute = now.getMinute();
-                    String minuteFormatted = String.format("%02d", minute);
-                    String dayFormatted = String.format("%02d", day);
-                    String monthFormatted = String.format("%02d", month);
+        try {
+            FirebaseUser user = mAuth.getCurrentUser();
+            String userId = user.getUid();
+            long timestamp = System.currentTimeMillis();
+            if (user != null) {
+                firebaseDatabase.getReference().addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        try {
+                            LocalDateTime now = LocalDateTime.now();
+                            int year = now.getYear();
+                            int month = now.getMonthValue();
+                            int day = now.getDayOfMonth();
+                            int hour = now.getHour();
+                            int minute = now.getMinute();
+                            String minuteFormatted = String.format("%02d", minute);
+                            String dayFormatted = String.format("%02d", day);
+                            String monthFormatted = String.format("%02d", month);
 
-                    String dateForTimeKeeping = day + " " + month + " " + year + " " + hour + ":" + minuteFormatted;
-                    String dateForCheckIn = dayFormatted + "/" + monthFormatted + "/" + year + " " + hour + ":" + minuteFormatted;
+                            String dateForTimeKeeping = day + " " + month + " " + year + " " + hour + ":" + minuteFormatted;
+                            String dateForCheckIn = dayFormatted + "/" + monthFormatted + "/" + year + " " + hour + ":" + minuteFormatted;
 
-                    DatabaseReference userReference = firebaseDatabase.getReference("User").child(userId).child("timekeeping");
+                            DatabaseReference userReference = firebaseDatabase.getReference("User").child(userId).child("timekeeping");
 
-                    userReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            String id = timestamp + " " + dateForTimeKeeping; // Tạo id mới
-                            DatabaseReference newTimekeepingRef = userReference.child(id);
+                            userReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    try {
+                                        String id = timestamp + " " + dateForTimeKeeping; // Tạo id mới
+                                        DatabaseReference newTimekeepingRef = userReference.child(id);
 
-                            if (!snapshot.child(id).exists()) {
-                                String checkIn = dateForCheckIn; // Giờ check in mặc định
-                                String checkOut = ""; // Không có giờ check out khi mới thêm
+                                        if (!snapshot.child(id).exists()) {
+                                            String checkIn = dateForCheckIn; // Giờ check in mặc định
+                                            String checkOut = ""; // Không có giờ check out khi mới thêm
 
-                                Map<String, Object> timekeepingData = new HashMap<>();
-                                timekeepingData.put("id", id);
-                                timekeepingData.put("checkIn", checkIn);
-                                timekeepingData.put("checkOut", checkOut);
+                                            Map<String, Object> timekeepingData = new HashMap<>();
+                                            timekeepingData.put("id", id);
+                                            timekeepingData.put("checkIn", checkIn);
+                                            timekeepingData.put("checkOut", checkOut);
 
-                                newTimekeepingRef.setValue(timekeepingData).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        if (task.isSuccessful()) {
-                                            Log.d(TAG, "Data added successfully");
+                                            newTimekeepingRef.setValue(timekeepingData).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<Void> task) {
+                                                    if (task.isSuccessful()) {
+                                                        Log.d(TAG, "Data added successfully");
+                                                    } else {
+                                                        Log.d(TAG, "Failed to add data");
+                                                    }
+                                                }
+                                            });
                                         } else {
-                                            Log.d(TAG, "Failed to add data");
+                                            Log.d(TAG, "Data already exists for today");
+                                            Toast.makeText(getContext(), "Data already exists for today", Toast.LENGTH_SHORT).show();
                                         }
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
                                     }
-                                });
-                            } else {
-                                Log.d(TAG, "Data already exists for today");
-                                Toast.makeText(getContext(), "Data already exists for today", Toast.LENGTH_SHORT).show();
-                            }
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+                                    Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
+                    }
 
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-                            Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
-                }
-            });
-
-        } else {
-            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } else {
+                Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
     public void setupTimerButtonVisibilityListener() {
-        FirebaseUser user = mAuth.getCurrentUser();
-        if (user != null) {
-            String userId = user.getUid();
-            DatabaseReference userReference = firebaseDatabase.getReference("User").child(userId).child("timekeeping");
+        try {
+            FirebaseUser user = mAuth.getCurrentUser();
+            if (user != null) {
+                String userId = user.getUid();
+                DatabaseReference userReference = firebaseDatabase.getReference("User").child(userId).child("timekeeping");
 
-            Query query = userReference.orderByChild("timestamp").limitToLast(1);
+                Query query = userReference.orderByChild("timestamp").limitToLast(1);
 
-            ValueEventListener valueEventListener = new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if (snapshot.exists()) {
-                        boolean checkoutExists = false;
-                        // Kiểm tra nếu có ít nhất một mục có trường checkout không rỗng
-                        for (DataSnapshot childSnapshot : snapshot.getChildren()) {
-                            String checkoutTime = childSnapshot.child("checkOut").getValue(String.class);
-                            if (checkoutTime != null && !checkoutTime.isEmpty()) {
-                                checkoutExists = true;
-                                break;
-                            }
-                        }
-                        // Cập nhật giao diện dựa trên tồn tại của checkout
-                        if (checkoutExists) { //checkout tồn tại
-                            on_shift_imgBtn.setVisibility(View.GONE);
-                            scanQr_imgBtn.setVisibility(View.VISIBLE);
-                            scan_txt.setText("Scan QR");
-                        } else { // checkout không tồn tại
-                            on_shift_imgBtn.setVisibility(View.VISIBLE);
-                            scanQr_imgBtn.setVisibility(View.GONE);
-                            scan_txt.setText("On shift");
-                        }
-                    } else {
-                        // Không có dữ liệu, hiển thị nút Timer
-                        on_shift_imgBtn.setVisibility(View.VISIBLE);
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    // Xử lý lỗi nếu có
-                    Toast.makeText(getContext(), "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            };
-
-            // Gắn lắng nghe vào truy vấn
-            query.addValueEventListener(valueEventListener);
-
-            // Lưu trữ ValueEventListener để có thể loại bỏ lắng nghe sau này nếu cần
-            // (ví dụ: trong phương thức onDestroy của Activity hoặc Fragment)
-            // Đảm bảo rằng bạn cần loại bỏ lắng nghe khi không cần thiết để tránh rò rỉ bộ nhớ.
-            // Đối với Fragment, bạn có thể sử dụng onViewCreated hoặc onCreate để gắn lắng nghe
-            // và sử dụng onDestroyView hoặc onDestroy để loại bỏ nó.
-            // Đối với Activity, bạn có thể sử dụng onStart và onStop tương tự.
-            // Ví dụ:
-            // query.removeEventListener(valueEventListener);
-        } else {
-            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    public void setDataQrCode(){
-
-        FirebaseUser user = mAuth.getCurrentUser();
-        String userId = user.getUid();
-        if (user != null) {
-            firebaseDatabase.getReference().addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    String ownerShopId = snapshot.child("User").child(userId).child("shopID").getValue(String.class);
-                    if(ownerShopId != null){
-                        DatabaseReference shopRef = firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("QRCode").child("codeScan");
-                        // Thực hiện thay đổi dữ liệu
-                        LocalDate today = LocalDate.now();
-
-                        int year = today.getYear();
-                        int month = today.getMonthValue();
-                        int day = today.getDayOfMonth();
-                        String dateForTimeKeeping = day + "/" + month + "/" + year;
-
-                        String dateString = day + "/" + month + "/" + year;
-                        // Lấy giờ và phút hiện tại
-                        Calendar currentTime = Calendar.getInstance();
-                        int hour = currentTime.get(Calendar.HOUR_OF_DAY);
-                        int minute = currentTime.get(Calendar.MINUTE);
-
-                        // Thêm giờ và phút vào chuỗi dateString
-                        dateString += " " + hour + ":" + minute;
-
-
-                        String qrcode = dateString + userId;
-                        String encodedString = Base64.encodeToString(qrcode.getBytes(), Base64.DEFAULT);
-                        shopRef.setValue(encodedString).addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                if (task.isSuccessful()) {
-                                    Toast.makeText(getContext(), "QR Code updated successfully", Toast.LENGTH_SHORT).show();
-                                } else {
-                                    Toast.makeText(getContext(), "Failed to update QR Code", Toast.LENGTH_SHORT).show();
-                                }
-                            }
-                        });
-                    } else {
-                        Toast.makeText(getContext(), "Shop not found", Toast.LENGTH_SHORT).show();
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
-                }
-            });
-        } else {
-            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
-        }
-
-    }
-
-    private void loadDataFromFirebase() {
-        loadDialog.show();
-        FirebaseUser user = mAuth.getCurrentUser();
-        String userId = user.getUid();
-        if (user != null) {
-            firebaseDatabase.getReference().addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    String ownerShopId = snapshot.child("User").child(userId).child("shopID").getValue(String.class);
-                    Log.d(TAG, "Owner Shop ID: " + ownerShopId);
-                    if (ownerShopId != null) {
-                        firebaseDatabase.getReference("User").addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                List<Timekeeping> reversedTimekeepingList = new ArrayList<>(); // Danh sách mới để lưu trữ thời gian làm việc theo thứ tự ngược lại
-                                for (DataSnapshot userSnapshot : snapshot.getChildren()) {
-                                    String userKey = userSnapshot.getKey();
-                                    if (userKey != null && userKey.equals(userId)) {
-                                        for (DataSnapshot timekeepingSnapshot : snapshot.child(userKey).child("timekeeping").getChildren()) {
-                                            String checkIn = timekeepingSnapshot.child("checkIn").getValue(String.class);
-                                            String checkOut = timekeepingSnapshot.child("checkOut").getValue(String.class);
-                                            String[] parts = checkIn.split(" "); // Tách chuỗi theo dấu cách
-                                            String datePart = parts[0]; // Ghép lại phần ngày tháng năm
-                                            Log.d(TAG, "Date: " + datePart);
-                                            Log.d(TAG, "Check In: " + checkIn);
-                                            Log.d(TAG, "Check Out: " + checkOut);
-                                            // Thêm thời gian làm việc vào đầu danh sách mới
-                                            reversedTimekeepingList.add(0, new Timekeeping(datePart, checkIn, checkOut));
-                                        }
-                                        // Đã duyệt xong danh sách, thoát khỏi vòng lặp
+                ValueEventListener valueEventListener = new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        try {
+                            if (snapshot.exists()) {
+                                boolean checkoutExists = false;
+                                // Kiểm tra nếu có ít nhất một mục có trường checkout không rỗng
+                                for (DataSnapshot childSnapshot : snapshot.getChildren()) {
+                                    String checkoutTime = childSnapshot.child("checkOut").getValue(String.class);
+                                    if (checkoutTime != null && !checkoutTime.isEmpty()) {
+                                        checkoutExists = true;
                                         break;
                                     }
                                 }
-                                // Xóa tất cả các mục cũ trong danh sách thời gian làm việc
-                                timekeepingList.clear();
-                                // Thêm tất cả các mục từ danh sách mới đã đảo ngược vào danh sách thời gian làm việc
-                                timekeepingList.addAll(reversedTimekeepingList);
-                                loadDialog.dismiss();
-                                adapter.notifyDataSetChanged();
+                                // Cập nhật giao diện dựa trên tồn tại của checkout
+                                if (checkoutExists) { //checkout tồn tại
+                                    on_shift_imgBtn.setVisibility(View.GONE);
+                                    scanQr_imgBtn.setVisibility(View.VISIBLE);
+                                    scan_txt.setText("Scan QR");
+                                } else { // checkout không tồn tại
+                                    on_shift_imgBtn.setVisibility(View.VISIBLE);
+                                    scanQr_imgBtn.setVisibility(View.GONE);
+                                    scan_txt.setText("On shift");
+                                }
+                            } else {
+                                // Không có dữ liệu, hiển thị nút Timer
+                                on_shift_imgBtn.setVisibility(View.VISIBLE);
                             }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
-                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                    } else {
-                        Toast.makeText(getContext(), "Shop not found", Toast.LENGTH_SHORT).show();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
-                }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        // Xử lý lỗi nếu có
+                        Toast.makeText(getContext(), "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                };
 
-                }
-            });
-        } else {
-            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+                // Gắn lắng nghe vào truy vấn
+                query.addValueEventListener(valueEventListener);
+
+                // Lưu trữ ValueEventListener để có thể loại bỏ lắng nghe sau này nếu cần
+                // (ví dụ: trong phương thức onDestroy của Activity hoặc Fragment)
+                // Đảm bảo rằng bạn cần loại bỏ lắng nghe khi không cần thiết để tránh rò rỉ bộ nhớ.
+                // Đối với Fragment, bạn có thể sử dụng onViewCreated hoặc onCreate để gắn lắng nghe
+                // và sử dụng onDestroyView hoặc onDestroy để loại bỏ nó.
+                // Đối với Activity, bạn có thể sử dụng onStart và onStop tương tự.
+                // Ví dụ:
+                // query.removeEventListener(valueEventListener);
+            } else {
+                Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void setDataQrCode() {
+        try {
+            FirebaseUser user = mAuth.getCurrentUser();
+            String userId = user.getUid();
+            if (user != null) {
+                firebaseDatabase.getReference().addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        try {
+                            String ownerShopId = snapshot.child("User").child(userId).child("shopID").getValue(String.class);
+                            if(ownerShopId != null){
+                                DatabaseReference shopRef = firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("QRCode").child("codeScan");
+                                // Thực hiện thay đổi dữ liệu
+                                LocalDate today = LocalDate.now();
+
+                                int year = today.getYear();
+                                int month = today.getMonthValue();
+                                int day = today.getDayOfMonth();
+                                String dateForTimeKeeping = day + "/" + month + "/" + year;
+
+                                String dateString = day + "/" + month + "/" + year;
+                                // Lấy giờ và phút hiện tại
+                                Calendar currentTime = Calendar.getInstance();
+                                int hour = currentTime.get(Calendar.HOUR_OF_DAY);
+                                int minute = currentTime.get(Calendar.MINUTE);
+
+                                // Thêm giờ và phút vào chuỗi dateString
+                                dateString += " " + hour + ":" + minute;
+
+
+                                String qrcode = dateString + userId;
+                                String encodedString = Base64.encodeToString(qrcode.getBytes(), Base64.DEFAULT);
+                                shopRef.setValue(encodedString).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if (task.isSuccessful()) {
+                                            Toast.makeText(getContext(), "QR Code updated successfully", Toast.LENGTH_SHORT).show();
+                                        } else {
+                                            Toast.makeText(getContext(), "Failed to update QR Code", Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
+                                });
+                            } else {
+                                Toast.makeText(getContext(), "Shop not found", Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } else {
+                Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadDataFromFirebase() {
+        try {
+            loadDialog.show();
+            FirebaseUser user = mAuth.getCurrentUser();
+            String userId = user.getUid();
+            if (user != null) {
+                firebaseDatabase.getReference().addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        try {
+                            String ownerShopId = snapshot.child("User").child(userId).child("shopID").getValue(String.class);
+                            Log.d(TAG, "Owner Shop ID: " + ownerShopId);
+                            if (ownerShopId != null) {
+                                firebaseDatabase.getReference("User").addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                        try {
+                                            List<Timekeeping> reversedTimekeepingList = new ArrayList<>();
+                                            for (DataSnapshot userSnapshot : snapshot.getChildren()) {
+                                                String userKey = userSnapshot.getKey();
+                                                if (userKey != null && userKey.equals(userId)) {
+                                                    for (DataSnapshot timekeepingSnapshot : snapshot.child(userKey).child("timekeeping").getChildren()) {
+                                                        try {
+                                                            String checkIn = timekeepingSnapshot.child("checkIn").getValue(String.class);
+                                                            String checkOut = timekeepingSnapshot.child("checkOut").getValue(String.class);
+                                                            String[] parts = checkIn.split(" ");
+                                                            String datePart = parts[0];
+                                                            Log.d(TAG, "Date: " + datePart);
+                                                            Log.d(TAG, "Check In: " + checkIn);
+                                                            Log.d(TAG, "Check Out: " + checkOut);
+                                                            reversedTimekeepingList.add(0, new Timekeeping(datePart, checkIn, checkOut));
+                                                        } catch (Exception e) {
+                                                            e.printStackTrace();
+                                                        }
+                                                    }
+                                                    break;
+                                                }
+                                            }
+                                            timekeepingList.clear();
+                                            timekeepingList.addAll(reversedTimekeepingList);
+                                            loadDialog.dismiss();
+                                            adapter.notifyDataSetChanged();
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+                                        Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            } else {
+                                Toast.makeText(getContext(), "Shop not found", Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+            } else {
+                Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -692,321 +743,381 @@ public class StaffHomeFragment extends Fragment {
     }
 
     public void getDataTimeKeeping() {
-        FirebaseUser user = mAuth.getCurrentUser();
-        String userId = user.getUid();
-        if (user != null) {
-            DatabaseReference userReference = firebaseDatabase.getReference("User").child(userId).child("timekeeping");
+        try {
+            FirebaseUser user = mAuth.getCurrentUser();
+            String userId = user.getUid();
+            if (user != null) {
+                DatabaseReference userReference = firebaseDatabase.getReference("User").child(userId).child("timekeeping");
 
-            // Sắp xếp theo thời gian giảm dần và giới hạn kết quả chỉ lấy 1 mục cuối cùng
-            Query query = userReference.orderByChild("timestamp").limitToLast(1);
+                // Sắp xếp theo thời gian giảm dần và giới hạn kết quả chỉ lấy 1 mục cuối cùng
+                Query query = userReference.orderByChild("timestamp").limitToLast(1);
 
-            query.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if (snapshot.exists()) {
-                        // Lặp qua kết quả (thoả mãn chỉ có 1 mục) để lấy dữ liệu
-                        for (DataSnapshot childSnapshot : snapshot.getChildren()) {
-                            String checkInTime = childSnapshot.child("checkIn").getValue(String.class);
-                            String[] parts = checkInTime.split(" "); // Tách chuỗi theo dấu cách
-                            String hourPart = parts[1]; // Ghép lại phần ngày tháng năm
-                            String datePart = parts[0]; // Ghép lại phần ngày tháng năm
-                            // Hiển thị dữ liệu
-                            time_hour_tv.setText(hourPart);
-                            time_date_tv.setText(datePart);
-
+                query.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        try {
+                            if (snapshot.exists()) {
+                                // Lặp qua kết quả (thoả mãn chỉ có 1 mục) để lấy dữ liệu
+                                for (DataSnapshot childSnapshot : snapshot.getChildren()) {
+                                    try {
+                                        String checkInTime = childSnapshot.child("checkIn").getValue(String.class);
+                                        String[] parts = checkInTime.split(" "); // Tách chuỗi theo dấu cách
+                                        String hourPart = parts[1]; // Ghép lại phần ngày tháng năm
+                                        String datePart = parts[0]; // Ghép lại phần ngày tháng năm
+                                        // Hiển thị dữ liệu
+                                        time_hour_tv.setText(hourPart);
+                                        time_date_tv.setText(datePart);
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            } else {
+                                Toast.makeText(getContext(), "Data doesn't exist", Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
-                    } else {
-                        Toast.makeText(getContext(), "Data doesn't exist", Toast.LENGTH_SHORT).show();
                     }
-                }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
-                }
-            });
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                    }
+                });
 
-        } else {
-            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
 
-    public void getUsername(){
-        FirebaseUser user = mAuth.getCurrentUser();
-        String userId = user.getUid();
-        if (user != null) {
-            DatabaseReference userReference = firebaseDatabase.getReference("User").child(userId);
 
+    public void getUsername() {
+        try {
+            FirebaseUser user = mAuth.getCurrentUser();
+            String userId = user.getUid();
+            if (user != null) {
+                DatabaseReference userReference = firebaseDatabase.getReference("User").child(userId);
 
-            userReference.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if (snapshot.exists()) {
-                        String name = snapshot.child("name").getValue(String.class);
-                        title_name_home_tv.setText("Hello, " + name);
-                    } else {
-                        Toast.makeText(getContext(), "Data doesn't exist", Toast.LENGTH_SHORT).show();
+                userReference.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        try {
+                            if (snapshot.exists()) {
+                                String name = snapshot.child("name").getValue(String.class);
+                                title_name_home_tv.setText("Hello, " + name);
+                            } else {
+                                Toast.makeText(getContext(), "Data doesn't exist", Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
-                }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
-                }
-            });
-
-        } else {
-            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } else {
+                Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
     private void handleQRCodeResult(String contents) {
-        FirebaseUser user = mAuth.getCurrentUser();
-        String userId = user.getUid();
-        if (user != null) {
-            firebaseDatabase.getReference().addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    String ownerShopId = snapshot.child("User").child(userId).child("shopID").getValue(String.class);
-                    if(ownerShopId != null){
-                        firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("QRCode").child("codeScan")
-                                .addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                        String realtimeqr = snapshot.getValue(String.class);
-                                        if (contents.equals(realtimeqr)){
-                                            Toast.makeText(getContext(), "Check out successful!", Toast.LENGTH_SHORT).show();
-                                            setDataForCheckout();
-                                            totalCost();
-                                            startActivity(new Intent(getActivity(), BottomTabActivity.class));
-                                        }else {
-                                            Toast.makeText(getContext(), "Scan failed!", Toast.LENGTH_SHORT).show();
-                                        }
+        try {
+            FirebaseUser user = mAuth.getCurrentUser();
+            String userId = user.getUid();
+            if (user != null) {
+                firebaseDatabase.getReference().addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        try {
+                            String ownerShopId = snapshot.child("User").child(userId).child("shopID").getValue(String.class);
+                            if(ownerShopId != null){
+                                firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("QRCode").child("codeScan")
+                                        .addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                                try {
+                                                    String realtimeqr = snapshot.getValue(String.class);
+                                                    if (contents.equals(realtimeqr)){
+                                                        Toast.makeText(getContext(), "Check out successful!", Toast.LENGTH_SHORT).show();
+                                                        setDataForCheckout();
+                                                        totalCost();
+                                                        startActivity(new Intent(getActivity(), BottomTabActivity.class));
+                                                    }else {
+                                                        Toast.makeText(getContext(), "Scan failed!", Toast.LENGTH_SHORT).show();
+                                                    }
+                                                } catch (Exception e) {
+                                                    e.printStackTrace();
+                                                }
+                                            }
 
-                                    }
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError error) {
 
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError error) {
-
-                                    }
-                                });
+                                            }
+                                        });
+                            }
+                            else {
+                                Toast.makeText(getContext(), "Shop not found", Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
-                    else {
-                        Toast.makeText(getContext(), "Shop not found", Toast.LENGTH_SHORT).show();
-                    }
-                }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }else {
-            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }else {
+                Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-
     }
 
     public void setDataForCheckout() {
-        FirebaseUser user = mAuth.getCurrentUser();
-        String userId = user.getUid();
-        if (user != null) {
-            DatabaseReference userReference = firebaseDatabase.getReference("User").
-                    child(userId).child("timekeeping");
+        try {
+            FirebaseUser user = mAuth.getCurrentUser();
+            String userId = user.getUid();
+            if (user != null) {
+                DatabaseReference userReference = firebaseDatabase.getReference("User").
+                        child(userId).child("timekeeping");
 
-            // Đặt dữ liệu cho checkout
-            LocalDateTime now = LocalDateTime.now();
-            int year = now.getYear();
-            int month = now.getMonthValue();
-            int day = now.getDayOfMonth();
-            int hour = now.getHour();
-            int minute = now.getMinute();
-            String minuteFormatted = String.format("%02d", minute);
-            String dayFormatted = String.format("%02d", day);
-            String monthFormatted = String.format("%02d", month);
+                // Đặt dữ liệu cho checkout
+                LocalDateTime now = LocalDateTime.now();
+                int year = now.getYear();
+                int month = now.getMonthValue();
+                int day = now.getDayOfMonth();
+                int hour = now.getHour();
+                int minute = now.getMinute();
+                String minuteFormatted = String.format("%02d", minute);
+                String dayFormatted = String.format("%02d", day);
+                String monthFormatted = String.format("%02d", month);
 
-            String checkoutTime = dayFormatted + "/" + monthFormatted + "/" + year + " " + hour + ":" + minuteFormatted;
+                String checkoutTime = dayFormatted + "/" + monthFormatted + "/" + year + " " + hour + ":" + minuteFormatted;
 
-            // Tạo một đối tượng chứa dữ liệu để đẩy lên Firebase
-            Map<String, Object> checkoutData = new HashMap<>();
-            checkoutData.put("checkOut", checkoutTime);
+                // Tạo một đối tượng chứa dữ liệu để đẩy lên Firebase
+                Map<String, Object> checkoutData = new HashMap<>();
+                checkoutData.put("checkOut", checkoutTime);
 
-            // Thực hiện truy vấn để lấy mục cuối cùng
-            Query query = userReference.orderByChild("timestamp").limitToLast(1);
+                // Thực hiện truy vấn để lấy mục cuối cùng
+                Query query = userReference.orderByChild("timestamp").limitToLast(1);
 
-            query.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if (snapshot.exists()) {
-                        // Lặp qua kết quả (thoả mãn chỉ có 1 mục) để cập nhật dữ liệu checkout
-                        for (DataSnapshot childSnapshot : snapshot.getChildren()) {
-                            String lastKey = childSnapshot.getKey();
+                query.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        try {
+                            if (snapshot.exists()) {
+                                // Lặp qua kết quả (thoả mãn chỉ có 1 mục) để cập nhật dữ liệu checkout
+                                for (DataSnapshot childSnapshot : snapshot.getChildren()) {
+                                    try {
+                                        String lastKey = childSnapshot.getKey();
 
-                            // Thêm dữ liệu checkout vào mục cuối cùng
-                            userReference.child(lastKey).updateChildren(checkoutData)
-                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                        @Override
-                                        public void onSuccess(Void aVoid) {
-                                            // Thành công
-                                            //hasCheckedOut = true;
+                                        // Thêm dữ liệu checkout vào mục cuối cùng
+                                        userReference.child(lastKey).updateChildren(checkoutData)
+                                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                    @Override
+                                                    public void onSuccess(Void aVoid) {
+                                                        // Thành công
+                                                        //hasCheckedOut = true;
 
-                                            Toast.makeText(getContext(), "Checkout data set successfully", Toast.LENGTH_SHORT).show();
-                                        }
-                                    })
-                                    .addOnFailureListener(new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
-                                            // Lỗi xảy ra
-                                            Toast.makeText(getContext(), "Failed to set checkout data", Toast.LENGTH_SHORT).show();
-                                        }
-                                    });
+                                                        Toast.makeText(getContext(), "Checkout data set successfully", Toast.LENGTH_SHORT).show();
+                                                    }
+                                                })
+                                                .addOnFailureListener(new OnFailureListener() {
+                                                    @Override
+                                                    public void onFailure(@NonNull Exception e) {
+                                                        // Lỗi xảy ra
+                                                        Toast.makeText(getContext(), "Failed to set checkout data", Toast.LENGTH_SHORT).show();
+                                                    }
+                                                });
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            } else {
+                                // Không tìm thấy dữ liệu
+                                Toast.makeText(getContext(), "No data found", Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
-                    } else {
-                        // Không tìm thấy dữ liệu
-                        Toast.makeText(getContext(), "No data found", Toast.LENGTH_SHORT).show();
                     }
-                }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    // Lỗi xảy ra
-                    Toast.makeText(getContext(), "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        // Lỗi xảy ra
+                        Toast.makeText(getContext(), "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
 
-        } else {
-            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
     private void loadDataSalary() {
-        FirebaseUser user = mAuth.getCurrentUser();
-        if (user != null) {
-            String userId = user.getUid();
-            DatabaseReference userRef = firebaseDatabase.getReference("User");
+        try {
+            FirebaseUser user = mAuth.getCurrentUser();
+            if (user != null) {
+                String userId = user.getUid();
+                DatabaseReference userRef = firebaseDatabase.getReference("User");
 
-            userRef.child(userId).child("shopID").addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    String ownerShopId = snapshot.getValue(String.class);
-                    if (ownerShopId != null) {
-                        userRef.child(userId).child("salary").addValueEventListener(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                for (DataSnapshot salarySnapshot : snapshot.getChildren()) {
-                                    String status = salarySnapshot.child("status").getValue(String.class);
-                                    if (status != null && status.equals("Not paid yet")) {
-                                        // Only process data if status is "Not paid yet"
+                userRef.child(userId).child("shopID").addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        try {
+                            String ownerShopId = snapshot.getValue(String.class);
+                            if (ownerShopId != null) {
+                                userRef.child(userId).child("salary").addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                        try {
+                                            for (DataSnapshot salarySnapshot : snapshot.getChildren()) {
+                                                String status = salarySnapshot.child("status").getValue(String.class);
+                                                if (status != null && status.equals("Not paid yet")) {
+                                                    // Only process data if status is "Not paid yet"
 
-                                        Integer currentSalary = salarySnapshot.child("currentSalary").getValue(Integer.class);
+                                                    Integer currentSalary = salarySnapshot.child("currentSalary").getValue(Integer.class);
 
-                                        DecimalFormat formatter = new DecimalFormat("#,###");
-                                        String formattedSalary = formatter.format(currentSalary);
+                                                    DecimalFormat formatter = new DecimalFormat("#,###");
+                                                    String formattedSalary = formatter.format(currentSalary);
 
-                                        // Update UI with data from relevant key
-                                        total_salary_home_tv.setText(formattedSalary + " VND");
+                                                    // Update UI with data from relevant key
+                                                    total_salary_home_tv.setText(formattedSalary + " VND");
 
 
-                                        // Exit loop after processing one entry (optional, depending on your requirement)
-                                        break;
+                                                    // Exit loop after processing one entry (optional, depending on your requirement)
+                                                    break;
+                                                }
+                                            }
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
                                     }
-                                }
-                            }
 
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
-                                Log.e(TAG, "Firebase Database Error: " + error.getMessage());
-                                Toast.makeText(getContext(), "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+                                        Log.e(TAG, "Firebase Database Error: " + error.getMessage());
+                                        Toast.makeText(getContext(), "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            } else {
+                                Toast.makeText(getContext(), "Shop not found", Toast.LENGTH_SHORT).show();
                             }
-                        });
-                    } else {
-                        Toast.makeText(getContext(), "Shop not found", Toast.LENGTH_SHORT).show();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
-                }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    Log.e(TAG, "Firebase Database Error: " + error.getMessage());
-                    Toast.makeText(getContext(), "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
-        } else {
-            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
-
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Log.e(TAG, "Firebase Database Error: " + error.getMessage());
+                        Toast.makeText(getContext(), "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } else {
+                Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
 
     public void totalCost() {
-        FirebaseUser user = mAuth.getCurrentUser();
-        if (user != null) {
-            String userId = user.getUid();
-            DatabaseReference userRef = firebaseDatabase.getReference("User");
+        try {
+            FirebaseUser user = mAuth.getCurrentUser();
+            if (user != null) {
+                String userId = user.getUid();
+                DatabaseReference userRef = firebaseDatabase.getReference("User");
 
-            userRef.child(userId).child("shopID").addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    String ownerShopId = snapshot.getValue(String.class);
-                    if (ownerShopId != null) {
-                        userRef.child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                Integer hourlySalary = snapshot.child("hourlySalary").getValue(Integer.class);
-                                Calendar checkoutTime = Calendar.getInstance();
-                                currentTime = Calendar.getInstance(); // Lấy thời gian hiện tại
-                                hourText = time_hour_tv.getText().toString();
-                                dateText = time_date_tv.getText().toString();
-                                totalTime = dateText+ " " +  hourText;
-                                //slogan_tv.setText(totalTime);
-                                Log.d(TAG, "totalTime: " + totalTime);
-                                SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
-                                try {
-                                    Date parsedDate = dateFormat.parse(totalTime);
-                                    checkoutTime.setTime(parsedDate);
-                                } catch (ParseException e) {
-                                    e.printStackTrace();
-                                    return;
-                                }
+                userRef.child(userId).child("shopID").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        try {
+                            String ownerShopId = snapshot.getValue(String.class);
+                            if (ownerShopId != null) {
+                                userRef.child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                        try {
+                                            Integer hourlySalary = snapshot.child("hourlySalary").getValue(Integer.class);
+                                            Calendar checkoutTime = Calendar.getInstance();
+                                            currentTime = Calendar.getInstance(); // Lấy thời gian hiện tại
+                                            hourText = time_hour_tv.getText().toString();
+                                            dateText = time_date_tv.getText().toString();
+                                            totalTime = dateText + " " + hourText;
+                                            //slogan_tv.setText(totalTime);
+                                            Log.d(TAG, "totalTime: " + totalTime);
+                                            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+                                            try {
+                                                Date parsedDate = dateFormat.parse(totalTime);
+                                                checkoutTime.setTime(parsedDate);
+                                            } catch (ParseException e) {
+                                                e.printStackTrace();
+                                                return;
+                                            }
 
-                                // Tính toán thời gian giữa checkoutTime và thời gian đã set trước đó
-                                long timeDifferenceInMillis = checkoutTime.getTimeInMillis() - currentTime.getTimeInMillis();
+                                            // Tính toán thời gian giữa checkoutTime và thời gian đã set trước đó
+                                            long timeDifferenceInMillis = checkoutTime.getTimeInMillis() - currentTime.getTimeInMillis();
 
-                                // Chuyển đổi thời gian từ millis thành giờ
-                                double totalHours = timeDifferenceInMillis / (1000.0 * 3600);
+                                            // Chuyển đổi thời gian từ millis thành giờ
+                                            double totalHours = timeDifferenceInMillis / (1000.0 * 3600);
 
-                                // Tính số tiền tương ứng
-                                double totalCost = Math.abs(totalHours) * hourlySalary; // Sử dụng giá trị tuyệt đối của totalHours
+                                            // Tính số tiền tương ứng
+                                            double totalCost = Math.abs(totalHours) * hourlySalary; // Sử dụng giá trị tuyệt đối của totalHours
 
-                                updateSalaryWithTotalCost(totalCost);
+                                            updateSalaryWithTotalCost(totalCost);
 
-                                // Hiển thị số tiền lên giao diện người dùng
-                                Toast.makeText(getContext(), String.format(Locale.getDefault(), "Total cost: %.0f VND", totalCost), Toast.LENGTH_SHORT).show();
+                                            // Hiển thị số tiền lên giao diện người dùng
+                                            Toast.makeText(getContext(), String.format(Locale.getDefault(), "Total cost: %.0f VND", totalCost), Toast.LENGTH_SHORT).show();
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
+                                        Log.e(TAG, "Firebase Database Error: " + error.getMessage());
+                                        Toast.makeText(getContext(), "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            } else {
+                                Toast.makeText(getContext(), "Shop not found", Toast.LENGTH_SHORT).show();
                             }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
-                                Log.e(TAG, "Firebase Database Error: " + error.getMessage());
-                                Toast.makeText(getContext(), "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                    } else {
-                        Toast.makeText(getContext(), "Shop not found", Toast.LENGTH_SHORT).show();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
-                }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    Log.e(TAG, "Firebase Database Error: " + error.getMessage());
-                    Toast.makeText(getContext(), "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
-        } else {
-            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
-
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Log.e(TAG, "Firebase Database Error: " + error.getMessage());
+                        Toast.makeText(getContext(), "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } else {
+                Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
     }
 
     // Tính toán và cập nhật totalCost vào currentSalary trên cơ sở dữ liệu Firebase
@@ -1064,59 +1175,72 @@ public class StaffHomeFragment extends Fragment {
         }
     }
 
-    public void cancelShift(){
-        FirebaseUser user = mAuth.getCurrentUser();
-        String userId = user.getUid();
-        if (user != null) {
-            DatabaseReference userReference = firebaseDatabase.getReference("User").
-                    child(userId).child("timekeeping");
+    public void cancelShift() {
+        try {
+            FirebaseUser user = mAuth.getCurrentUser();
+            String userId = user.getUid();
+            if (user != null) {
+                DatabaseReference userReference = firebaseDatabase.getReference("User").
+                        child(userId).child("timekeeping");
 
-            // Thực hiện truy vấn để lấy mục cuối cùng
-            Query query = userReference.orderByChild("timestamp").limitToLast(1);
+                // Thực hiện truy vấn để lấy mục cuối cùng
+                Query query = userReference.orderByChild("timestamp").limitToLast(1);
 
-            query.addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if (snapshot.exists()) {
-                        // Lặp qua kết quả (thoả mãn chỉ có 1 mục) để xóa
-                        for (DataSnapshot childSnapshot : snapshot.getChildren()) {
-                            String lastKey = childSnapshot.getKey();
+                query.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        try {
+                            if (snapshot.exists()) {
+                                // Lặp qua kết quả (thoả mãn chỉ có 1 mục) để xóa
+                                for (DataSnapshot childSnapshot : snapshot.getChildren()) {
+                                    try {
+                                        String lastKey = childSnapshot.getKey();
 
-                            // Xóa mục cuối cùng
-                            userReference.child(lastKey).removeValue()
-                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                        @Override
-                                        public void onSuccess(Void aVoid) {
-                                            // Thành công
-                                            dialog.dismiss();
-                                            yesNoDialog.dismiss();
-                                            Toast.makeText(getContext(), "Last timekeeping removed successfully", Toast.LENGTH_SHORT).show();
-                                        }
-                                    })
-                                    .addOnFailureListener(new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
-                                            // Lỗi xảy ra
-                                            Toast.makeText(getContext(), "Failed to remove last timekeeping", Toast.LENGTH_SHORT).show();
-                                        }
-                                    });
+                                        // Xóa mục cuối cùng
+                                        userReference.child(lastKey).removeValue()
+                                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                    @Override
+                                                    public void onSuccess(Void aVoid) {
+                                                        // Thành công
+                                                        dialog.dismiss();
+                                                        yesNoDialog.dismiss();
+                                                        Toast.makeText(getContext(), "Shift cancellation successful!", Toast.LENGTH_SHORT).show();
+                                                    }
+                                                })
+                                                .addOnFailureListener(new OnFailureListener() {
+                                                    @Override
+                                                    public void onFailure(@NonNull Exception e) {
+                                                        // Lỗi xảy ra
+                                                        Toast.makeText(getContext(), "Failed to remove last timekeeping", Toast.LENGTH_SHORT).show();
+                                                    }
+                                                });
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            } else {
+                                // Không tìm thấy dữ liệu
+                                Toast.makeText(getContext(), "No timekeeping data found", Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
-                    } else {
-                        // Không tìm thấy dữ liệu
-                        Toast.makeText(getContext(), "No timekeeping data found", Toast.LENGTH_SHORT).show();
                     }
-                }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-                    // Lỗi xảy ra
-                    Toast.makeText(getContext(), "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        // Lỗi xảy ra
+                        Toast.makeText(getContext(), "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
 
-        } else {
-            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
+
 
 }
