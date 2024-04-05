@@ -900,4 +900,20 @@ public class StaffCalendarFragment extends Fragment {
         });
     }
 
+    private void showCustomToast(String message) {
+        // Inflate layout cho Toast
+        View layout = getLayoutInflater().inflate(R.layout.custom_toast, requireActivity().findViewById(R.id.custom_toast_container));
+
+        // Thiết lập nội dung của Toast
+        TextView textView = layout.findViewById(R.id.custom_toast_text);
+        textView.setText(message);
+
+        // Tạo một Toast và đặt layout của nó
+        Toast toast = new Toast(requireContext());
+        toast.setDuration(Toast.LENGTH_SHORT);
+        toast.setView(layout);
+        toast.show();
+    }
+
+
 }

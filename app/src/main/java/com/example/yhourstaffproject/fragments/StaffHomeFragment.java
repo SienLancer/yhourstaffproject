@@ -191,7 +191,7 @@ public class StaffHomeFragment extends Fragment {
     private ActivityResultLauncher<ScanOptions> qrCodeLauncher = registerForActivityResult(new ScanContract(), result -> {
         try {
             if (result.getContents() == null) {
-                Toast.makeText(getContext(), "Cancelled", Toast.LENGTH_SHORT).show();
+                showCustomToast("Cancelled");
             } else {
                 FirebaseUser user = mAuth.getCurrentUser();
                 if (user != null) {
@@ -291,7 +291,7 @@ public class StaffHomeFragment extends Fragment {
                         networkDialog.show();
                     }else {
                         networkDialog.dismiss();
-                        Toast.makeText(getContext(), "Network available", Toast.LENGTH_SHORT).show();
+                        showCustomToast("Network is available");
                         return;
                     }
                     handler.postDelayed(this, 7000); // Lặp lại sau mỗi 5 giây
@@ -351,12 +351,12 @@ public class StaffHomeFragment extends Fragment {
                                                 try {
                                                     String realtimeqr = snapshot.getValue(String.class);
                                                     if (contents.equals(realtimeqr)) {
-                                                        Toast.makeText(getContext(), "Scan successful!", Toast.LENGTH_SHORT).show();
+                                                        showCustomToast("Check In successful!");
                                                         addDataTimeKeeping();
 //                                                  startActivity(new Intent(getActivity(), TimerActivity.class));
 
                                                     } else {
-                                                        Toast.makeText(getContext(), "Scan failed!", Toast.LENGTH_SHORT).show();
+                                                        showCustomToast("Scan failed!");
                                                     }
                                                 } catch (Exception e) {
                                                     e.printStackTrace();
@@ -624,7 +624,7 @@ public class StaffHomeFragment extends Fragment {
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
                                         if (task.isSuccessful()) {
-                                            Toast.makeText(getContext(), "QR Code updated successfully", Toast.LENGTH_SHORT).show();
+                                            //Toast.makeText(getContext(), "QR Code updated successfully", Toast.LENGTH_SHORT).show();
                                         } else {
                                             Toast.makeText(getContext(), "Failed to update QR Code", Toast.LENGTH_SHORT).show();
                                         }
@@ -848,12 +848,12 @@ public class StaffHomeFragment extends Fragment {
                                                 try {
                                                     String realtimeqr = snapshot.getValue(String.class);
                                                     if (contents.equals(realtimeqr)){
-                                                        Toast.makeText(getContext(), "Check out successful!", Toast.LENGTH_SHORT).show();
+                                                        showCustomToast("Check Out successful!");
                                                         setDataForCheckout();
                                                         totalCost();
                                                         startActivity(new Intent(getActivity(), BottomTabActivity.class));
                                                     }else {
-                                                        Toast.makeText(getContext(), "Scan failed!", Toast.LENGTH_SHORT).show();
+                                                        showCustomToast("Scan failed!");
                                                     }
                                                 } catch (Exception e) {
                                                     e.printStackTrace();
@@ -1204,7 +1204,7 @@ public class StaffHomeFragment extends Fragment {
                                                         // Thành công
                                                         dialog.dismiss();
                                                         yesNoDialog.dismiss();
-                                                        Toast.makeText(getContext(), "Shift cancellation successful!", Toast.LENGTH_SHORT).show();
+                                                        showCustomToast("Shift canceled successfully");
                                                     }
                                                 })
                                                 .addOnFailureListener(new OnFailureListener() {
@@ -1240,6 +1240,23 @@ public class StaffHomeFragment extends Fragment {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+    }
+
+
+    private void showCustomToast(String message) {
+        // Inflate layout cho Toast
+        View layout = getLayoutInflater().inflate(R.layout.custom_toast, requireActivity().findViewById(R.id.custom_toast_container));
+
+        // Thiết lập nội dung của Toast
+        TextView textView = layout.findViewById(R.id.custom_toast_text);
+        textView.setText(message);
+
+        // Tạo một Toast và đặt layout của nó
+        Toast toast = new Toast(requireContext());
+        toast.setDuration(Toast.LENGTH_SHORT);
+        toast.setView(layout);
+        toast.show();
     }
 
 

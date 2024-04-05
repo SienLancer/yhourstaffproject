@@ -202,7 +202,6 @@ public class SalaryActivity extends AppCompatActivity {
                                         status_salary_tv.setText(status);
                                         start_date_salary_tv.setText(startDate);
                                         payday_salary_tv.setText(payDay);
-
                                         // Exit loop after processing one entry (optional, depending on your requirement)
                                         break;
                                     }
@@ -261,6 +260,7 @@ public class SalaryActivity extends AppCompatActivity {
                                         // Update status to "Received Salary" in database
                                         salarySnapshot.getRef().child("status").setValue("Received Salary");
                                         salarySnapshot.getRef().child("payDay").setValue(dateForPayDay);
+
                                     }
                                 }
                             }
@@ -300,5 +300,21 @@ public class SalaryActivity extends AppCompatActivity {
         // Handle case when user is not logged in
         Toast.makeText(SalaryActivity.this, "User not logged in", Toast.LENGTH_SHORT).show();
     }
+
+    private void showCustomToast(String message) {
+        // Inflate layout cho Toast
+        View layout = getLayoutInflater().inflate(R.layout.custom_toast, (ViewGroup) findViewById(R.id.custom_toast_container));
+
+        // Thiết lập nội dung của Toast
+        TextView textView = layout.findViewById(R.id.custom_toast_text);
+        textView.setText(message);
+
+        // Tạo một Toast và đặt layout của nó
+        Toast toast = new Toast(getApplicationContext());
+        toast.setDuration(Toast.LENGTH_SHORT);
+        toast.setView(layout);
+        toast.show();
+    }
+
 
 }
