@@ -108,7 +108,6 @@ public class StaffHomeFragment extends Fragment {
         loadDataFromFirebase();
         checkNetworkPeriodically(getContext());
 
-
         network_dialog_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -221,6 +220,7 @@ public class StaffHomeFragment extends Fragment {
                                 }
                             } else {
                                 // Không có dữ liệu, hiển thị nút Timer
+                                setResult(result.getContents());
                                 on_shift_imgBtn.setVisibility(View.VISIBLE);
                             }
                         }
@@ -353,7 +353,6 @@ public class StaffHomeFragment extends Fragment {
                                                     if (contents.equals(realtimeqr)) {
                                                         showCustomToast("Check In successful!");
                                                         addDataTimeKeeping();
-//                                                  startActivity(new Intent(getActivity(), TimerActivity.class));
 
                                                     } else {
                                                         showCustomToast("Scan failed!");
