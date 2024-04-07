@@ -17,7 +17,7 @@
         android:text="Salary list" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/salary_recycler_view"
+        android:id="@+id/salary_recycler_vieww"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="8dp" />

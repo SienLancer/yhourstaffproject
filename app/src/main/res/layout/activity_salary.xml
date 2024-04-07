@@ -6,58 +6,89 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@color/background"
     tools:context=".activities.SalaryActivity">
+
+    <ImageButton
+        android:id="@+id/back_salary_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/background"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="20dp"
+        app:srcCompat="@drawable/back_ic" />
 
     <TextView
         android:id="@+id/salary_title_tv"
         android:layout_width="wrap_content"
-        android:layout_gravity="center"
         android:layout_marginVertical="20dp"
+        android:layout_marginLeft="20dp"
+        android:fontFamily="@font/roboto_medium"
+        android:textSize="18sp"
+        android:textColor="@color/white"
         android:layout_height="wrap_content"
         android:text="My Salary" />
 
     <TextView
         android:id="@+id/start_date_salary_tv"
         android:layout_width="wrap_content"
-        android:layout_gravity="center"
         android:layout_marginTop="30dp"
+        android:fontFamily="@font/roboto"
+        android:textSize="14sp"
+        android:layout_marginLeft="20dp"
+        android:textColor="@color/white"
         android:layout_height="wrap_content"
-        android:text="TextView" />
+        android:text="00/00/0000 00:00" />
 
     <TextView
         android:id="@+id/total_salary_tv"
         android:layout_width="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="10dp"
+        android:fontFamily="@font/roboto_bold"
+        android:textSize="32sp"
+        android:layout_marginLeft="20dp"
+        android:textColor="@color/white"
         android:layout_height="wrap_content"
-        android:text="TextView" />
+        android:text="0" />
 
-    <TextView
-        android:id="@+id/status_salary_tv"
-        android:layout_width="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="30dp"
-        android:layout_height="wrap_content"
-        android:text="TextView" />
 
-    <TextView
-        android:id="@+id/payday_salary_tv"
-        android:layout_width="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="30dp"
-        android:layout_height="wrap_content"
-        android:text="TextView" />
 
     <Button
         android:id="@+id/received_salary_btn"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="30dp"
+        android:layout_gravity="center"
+        android:textColor="@color/white"
+        android:paddingHorizontal="40dp"
+        android:fontFamily="@font/roboto"
+        android:textSize="18sp"
+        android:background="@drawable/bg_signin_btn"
         android:text="Received Salary" />
-    <Button
-        android:id="@+id/salary_list_btn"
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:text="Salary List" />
+        android:layout_height="match_parent"
+        android:layout_marginTop="40dp"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="40dp"
+        android:background="@drawable/bg_list_timekeeping_home"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/textView11"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_medium"
+            android:textColor="@color/black"
+            android:text="Salary History"
+            android:textSize="18sp" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/salary_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="8dp" />
+    </LinearLayout>
+
 </LinearLayout>

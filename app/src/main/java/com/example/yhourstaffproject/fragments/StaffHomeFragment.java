@@ -43,6 +43,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.yhourstaffproject.R;
 import com.example.yhourstaffproject.activities.BottomTabActivity;
 import com.example.yhourstaffproject.activities.SalaryActivity;
+import com.example.yhourstaffproject.activities.SignInForStaffActivity;
 import com.example.yhourstaffproject.adapter.TimekeeppingAdapter;
 import com.example.yhourstaffproject.object.Timekeeping;
 import com.example.yhourstaffproject.utility.NetworkUtils;
@@ -654,6 +655,7 @@ public class StaffHomeFragment extends Fragment {
         try {
             loadDialog.show();
             FirebaseUser user = mAuth.getCurrentUser();
+            assert user != null;
             String userId = user.getUid();
             if (user != null) {
                 firebaseDatabase.getReference().addValueEventListener(new ValueEventListener() {
@@ -704,6 +706,7 @@ public class StaffHomeFragment extends Fragment {
                                 });
                             } else {
                                 Toast.makeText(getContext(), "Shop not found", Toast.LENGTH_SHORT).show();
+                                loadDialog.dismiss();
                             }
                         } catch (Exception e) {
                             e.printStackTrace();

@@ -6,12 +6,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -41,15 +37,14 @@ public class SalaryListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_salary_list);
 
-        recyclerView = findViewById(R.id.salary_recycler_view);
+        recyclerView = findViewById(R.id.salary_recycler_vieww);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new SalaryAdapter(salaries);
         recyclerView.setAdapter(adapter);
         // Load data from Firebase
-        loadDataFromFirebase();
     }
 
-    private void loadDataFromFirebase() {
+    private void loadDataList() {
         FirebaseUser user = mAuth.getCurrentUser();
         String userId = user.getUid();
         if (user != null) {

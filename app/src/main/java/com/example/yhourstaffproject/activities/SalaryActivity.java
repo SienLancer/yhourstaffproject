@@ -18,8 +18,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.yhourstaffproject.R;
+import com.example.yhourstaffproject.adapter.SalaryAdapter;
+import com.example.yhourstaffproject.object.Salary;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -32,12 +36,17 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class SalaryActivity extends AppCompatActivity {
     TextView total_salary_tv, status_salary_tv, start_date_salary_tv, payday_salary_tv;
-    Button received_salary_btn, salary_list_btn, button_yes, button_no;;
+    Button received_salary_btn, button_yes, button_no;
+    private RecyclerView recyclerView;
+    private SalaryAdapter adapter;
+    private List<Salary> salaries = new ArrayList<>();
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
     Dialog dialog;
     FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
@@ -48,11 +57,13 @@ public class SalaryActivity extends AppCompatActivity {
         setContentView(R.layout.activity_salary);
 
         total_salary_tv = findViewById(R.id.total_salary_tv);
-        status_salary_tv = findViewById(R.id.status_salary_tv);
         start_date_salary_tv = findViewById(R.id.start_date_salary_tv);
-        payday_salary_tv = findViewById(R.id.payday_salary_tv);
         received_salary_btn = findViewById(R.id.received_salary_btn);
-        salary_list_btn = findViewById(R.id.salary_list_btn);
+
+        recyclerView = findViewById(R.id.salary_recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new SalaryAdapter(salaries);
+        recyclerView.setAdapter(adapter);
 
         dialog=new Dialog(SalaryActivity.this);
         dialog.setContentView(R.layout.custom_yes_no_dialog);
@@ -62,13 +73,6 @@ public class SalaryActivity extends AppCompatActivity {
         button_no =dialog.findViewById(R.id.button_no);
 
 
-        salary_list_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(SalaryActivity.this, SalaryListActivity.class);
-                startActivity(intent);
-            }
-        });
 
         received_salary_btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -93,6 +97,82 @@ public class SalaryActivity extends AppCompatActivity {
         });
 
         loadDataFromFirebase();
+        loadDataList();
+    }
+
+    private void loadDataList() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        String userId = user.getUid();
+        if (user != null) {
+            firebaseDatabase.getReference().addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    String ownerShopId = snapshot.child("User").child(userId).child("shopID").getValue(String.class);
+                    Log.d(TAG, "Owner Shop ID: " + ownerShopId);
+                    if (ownerShopId != null) {
+                        firebaseDatabase.getReference("User").addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                for (DataSnapshot userSnapshot : snapshot.getChildren()) {
+                                    String userKey = userSnapshot.getKey();
+
+
+                                    if (userKey != null && userKey.equals(userId)){
+
+                                        for (DataSnapshot timekeepingSnapshot : snapshot.child(userKey).child("salary").getChildren()) {
+                                            String salaryKey = timekeepingSnapshot.getKey();
+
+                                            String sid = timekeepingSnapshot.child("id").getValue(String.class);
+                                            String startDate = timekeepingSnapshot.child("startDate").getValue(String.class);
+                                            Integer currentSalary = timekeepingSnapshot.child("currentSalary").getValue(Integer.class);
+                                            String status = timekeepingSnapshot.child("status").getValue(String.class);
+                                            String payDay = timekeepingSnapshot.child("payDay").getValue(String.class);
+
+
+                                            Log.d(TAG, "Salary Key: " + salaryKey);
+                                            Log.d(TAG, "Start Date: " + startDate);
+                                            Log.d(TAG, "Status: " + status);
+                                            Log.d(TAG, "Pay Day: " + payDay);
+                                            Log.d(TAG, "Current Salary: " + currentSalary);
+
+                                            salaries.add(new Salary(sid,currentSalary, status, startDate, payDay));
+                                            adapter.notifyDataSetChanged();
+
+
+                                        }
+
+
+                                        return; // Kết thúc vòng lặp sau khi tìm thấy tuần có ID trùng khớp
+                                    }
+
+
+                                }
+
+
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+                                Toast.makeText(SalaryActivity.this, "Error", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }else {
+                        Toast.makeText(SalaryActivity.this, "Shop not found", Toast.LENGTH_SHORT).show();
+                    }
+
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+
+        } else {
+            Toast.makeText(SalaryActivity.this, "User not logged in", Toast.LENGTH_SHORT).show();
+        }
+
+
     }
 
     private void confirmationOfSalaryReceipt() {
@@ -111,8 +191,8 @@ public class SalaryActivity extends AppCompatActivity {
                     int minute = now.getMinute();
                     String minuteFormatted = String.format("%02d", minute);
 
-                    String dateForTimeKeeping = day + " " + month + " " + year + " " + hour + ":" + minuteFormatted;
-                    String dateForPayDay = day + "/" + month + "/" + year + " " + hour + ":" + minuteFormatted;
+                    String dateForTimeKeeping = day + " " + month + " " + year;
+                    String dateForPayDay = day + "/" + month + "/" + year;
                     setDataStatusBefore();
                     DatabaseReference userReference = firebaseDatabase.getReference("User").child(userId).child("salary");
 
@@ -199,9 +279,7 @@ public class SalaryActivity extends AppCompatActivity {
 
                                         // Update UI with data from relevant key
                                         total_salary_tv.setText(formattedSalary + " VND");
-                                        status_salary_tv.setText(status);
                                         start_date_salary_tv.setText(startDate);
-                                        payday_salary_tv.setText(payDay);
                                         // Exit loop after processing one entry (optional, depending on your requirement)
                                         break;
                                     }
