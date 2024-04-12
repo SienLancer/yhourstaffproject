@@ -459,141 +459,2241 @@ public class StaffCalendarFragment extends Fragment {
         Mon1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                dialog.show();
+                // Hiển thị dialog để nhập dữ liệu
+                try {
+                    dialog.show();
+                    ip_shift_et.setText(Mon1.getText().toString());
 
+                    // Xử lý sự kiện khi người dùng nhấn vào nút add_shift_btn trong dialog
+                    add_shift_btn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            try {
+                                FirebaseUser user = mAuth.getCurrentUser();
+                                if (user != null) {
+                                    String userId = user.getUid();
+                                    String dataItem = ip_shift_et.getText().toString();
+                                    DatabaseReference userRef = firebaseDatabase.getReference().child("User").child(userId).child("shopID");
+                                    userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                            try {
+                                                String ownerShopId = snapshot.getValue(String.class);
+                                                if (ownerShopId != null) {
+                                                    DatabaseReference shopRef = firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("Calendar");
+
+                                                    shopRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                            try {
+                                                                // Lấy tất cả các tuần
+                                                                Iterable<DataSnapshot> weeks = dataSnapshot.getChildren();
+                                                                DataSnapshot lastWeekSnapshot = null;
+
+                                                                // Lặp qua tất cả các tuần và lưu lại tuần cuối cùng
+                                                                for (DataSnapshot weekSnapshot : weeks) {
+                                                                    lastWeekSnapshot = weekSnapshot;
+                                                                }
+
+                                                                if (lastWeekSnapshot != null) {
+                                                                    // Cập nhật dữ liệu của Sun3 trong tuần cuối cùng
+                                                                    DatabaseReference sun3Ref = lastWeekSnapshot.child("mon1").getRef();
+                                                                    String statusRef = lastWeekSnapshot.child("status").getValue(String.class);
+
+                                                                    if (statusRef != null && statusRef.equals("Opening")) {
+                                                                        sun3Ref.setValue(dataItem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                            @Override
+                                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                                try {
+                                                                                    if (task.isSuccessful()) {
+                                                                                        dialog.dismiss();
+                                                                                        showCustomToast("Timetable updated");
+                                                                                        Mon1.setText(dataItem);
+                                                                                    } else {
+                                                                                        showCustomToast("Timetable update failed");
+                                                                                    }
+                                                                                } catch (Exception e) {
+                                                                                    e.printStackTrace();
+                                                                                }
+                                                                            }
+                                                                        });
+                                                                    } else {
+                                                                        showCustomToast("Timetable is closed");
+                                                                    }
+
+                                                                } else {
+                                                                    showCustomToast("No weeks found");
+                                                                }
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError error) {
+                                                            try {
+                                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+                                                    });
+                                                } else {
+                                                    showCustomToast("Shop ID not found for this user");
+                                                }
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+                                            try {
+                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    });
+                                } else {
+                                    showCustomToast("User not logged");
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
         Mon2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                dialog.show();
+                // Hiển thị dialog để nhập dữ liệu
+                try {
+                    dialog.show();
+                    ip_shift_et.setText(Mon2.getText().toString());
 
+                    // Xử lý sự kiện khi người dùng nhấn vào nút add_shift_btn trong dialog
+                    add_shift_btn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            try {
+                                FirebaseUser user = mAuth.getCurrentUser();
+                                if (user != null) {
+                                    String userId = user.getUid();
+                                    String dataItem = ip_shift_et.getText().toString();
+                                    DatabaseReference userRef = firebaseDatabase.getReference().child("User").child(userId).child("shopID");
+                                    userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                            try {
+                                                String ownerShopId = snapshot.getValue(String.class);
+                                                if (ownerShopId != null) {
+                                                    DatabaseReference shopRef = firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("Calendar");
+
+                                                    shopRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                            try {
+                                                                // Lấy tất cả các tuần
+                                                                Iterable<DataSnapshot> weeks = dataSnapshot.getChildren();
+                                                                DataSnapshot lastWeekSnapshot = null;
+
+                                                                // Lặp qua tất cả các tuần và lưu lại tuần cuối cùng
+                                                                for (DataSnapshot weekSnapshot : weeks) {
+                                                                    lastWeekSnapshot = weekSnapshot;
+                                                                }
+
+                                                                if (lastWeekSnapshot != null) {
+                                                                    // Cập nhật dữ liệu của Sun3 trong tuần cuối cùng
+                                                                    DatabaseReference sun3Ref = lastWeekSnapshot.child("mon2").getRef();
+                                                                    String statusRef = lastWeekSnapshot.child("status").getValue(String.class);
+
+                                                                    if (statusRef != null && statusRef.equals("Opening")) {
+                                                                        sun3Ref.setValue(dataItem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                            @Override
+                                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                                try {
+                                                                                    if (task.isSuccessful()) {
+                                                                                        dialog.dismiss();
+                                                                                        showCustomToast("Timetable updated");
+                                                                                        Mon2.setText(dataItem);
+                                                                                    } else {
+                                                                                        showCustomToast("Timetable update failed");
+                                                                                    }
+                                                                                } catch (Exception e) {
+                                                                                    e.printStackTrace();
+                                                                                }
+                                                                            }
+                                                                        });
+                                                                    } else {
+                                                                        showCustomToast("Timetable is closed");
+                                                                    }
+
+                                                                } else {
+                                                                    showCustomToast("No weeks found");
+                                                                }
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError error) {
+                                                            try {
+                                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+                                                    });
+                                                } else {
+                                                    showCustomToast("Shop ID not found for this user");
+                                                }
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+                                            try {
+                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    });
+                                } else {
+                                    showCustomToast("User not logged");
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
         Mon3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                dialog.show();
+                // Hiển thị dialog để nhập dữ liệu
+                try {
+                    dialog.show();
+                    ip_shift_et.setText(Mon3.getText().toString());
 
+                    // Xử lý sự kiện khi người dùng nhấn vào nút add_shift_btn trong dialog
+                    add_shift_btn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            try {
+                                FirebaseUser user = mAuth.getCurrentUser();
+                                if (user != null) {
+                                    String userId = user.getUid();
+                                    String dataItem = ip_shift_et.getText().toString();
+                                    DatabaseReference userRef = firebaseDatabase.getReference().child("User").child(userId).child("shopID");
+                                    userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                            try {
+                                                String ownerShopId = snapshot.getValue(String.class);
+                                                if (ownerShopId != null) {
+                                                    DatabaseReference shopRef = firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("Calendar");
+
+                                                    shopRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                            try {
+                                                                // Lấy tất cả các tuần
+                                                                Iterable<DataSnapshot> weeks = dataSnapshot.getChildren();
+                                                                DataSnapshot lastWeekSnapshot = null;
+
+                                                                // Lặp qua tất cả các tuần và lưu lại tuần cuối cùng
+                                                                for (DataSnapshot weekSnapshot : weeks) {
+                                                                    lastWeekSnapshot = weekSnapshot;
+                                                                }
+
+                                                                if (lastWeekSnapshot != null) {
+                                                                    // Cập nhật dữ liệu của Sun3 trong tuần cuối cùng
+                                                                    DatabaseReference sun3Ref = lastWeekSnapshot.child("mon3").getRef();
+                                                                    String statusRef = lastWeekSnapshot.child("status").getValue(String.class);
+
+                                                                    if (statusRef != null && statusRef.equals("Opening")) {
+                                                                        sun3Ref.setValue(dataItem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                            @Override
+                                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                                try {
+                                                                                    if (task.isSuccessful()) {
+                                                                                        dialog.dismiss();
+                                                                                        showCustomToast("Timetable updated");
+                                                                                        Mon3.setText(dataItem);
+                                                                                    } else {
+                                                                                        showCustomToast("Timetable update failed");
+                                                                                    }
+                                                                                } catch (Exception e) {
+                                                                                    e.printStackTrace();
+                                                                                }
+                                                                            }
+                                                                        });
+                                                                    } else {
+                                                                        showCustomToast("Timetable is closed");
+                                                                    }
+
+                                                                } else {
+                                                                    showCustomToast("No weeks found");
+                                                                }
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError error) {
+                                                            try {
+                                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+                                                    });
+                                                } else {
+                                                    showCustomToast("Shop ID not found for this user");
+                                                }
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+                                            try {
+                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    });
+                                } else {
+                                    showCustomToast("User not logged");
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
         Tue1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                dialog.show();
+                // Hiển thị dialog để nhập dữ liệu
+                try {
+                    dialog.show();
+                    ip_shift_et.setText(Tue1.getText().toString());
 
+                    // Xử lý sự kiện khi người dùng nhấn vào nút add_shift_btn trong dialog
+                    add_shift_btn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            try {
+                                FirebaseUser user = mAuth.getCurrentUser();
+                                if (user != null) {
+                                    String userId = user.getUid();
+                                    String dataItem = ip_shift_et.getText().toString();
+                                    DatabaseReference userRef = firebaseDatabase.getReference().child("User").child(userId).child("shopID");
+                                    userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                            try {
+                                                String ownerShopId = snapshot.getValue(String.class);
+                                                if (ownerShopId != null) {
+                                                    DatabaseReference shopRef = firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("Calendar");
+
+                                                    shopRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                            try {
+                                                                // Lấy tất cả các tuần
+                                                                Iterable<DataSnapshot> weeks = dataSnapshot.getChildren();
+                                                                DataSnapshot lastWeekSnapshot = null;
+
+                                                                // Lặp qua tất cả các tuần và lưu lại tuần cuối cùng
+                                                                for (DataSnapshot weekSnapshot : weeks) {
+                                                                    lastWeekSnapshot = weekSnapshot;
+                                                                }
+
+                                                                if (lastWeekSnapshot != null) {
+                                                                    // Cập nhật dữ liệu của Sun3 trong tuần cuối cùng
+                                                                    DatabaseReference sun3Ref = lastWeekSnapshot.child("tue1").getRef();
+                                                                    String statusRef = lastWeekSnapshot.child("status").getValue(String.class);
+
+                                                                    if (statusRef != null && statusRef.equals("Opening")) {
+                                                                        sun3Ref.setValue(dataItem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                            @Override
+                                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                                try {
+                                                                                    if (task.isSuccessful()) {
+                                                                                        dialog.dismiss();
+                                                                                        showCustomToast("Timetable updated");
+                                                                                        Tue1.setText(dataItem);
+                                                                                    } else {
+                                                                                        showCustomToast("Timetable update failed");
+                                                                                    }
+                                                                                } catch (Exception e) {
+                                                                                    e.printStackTrace();
+                                                                                }
+                                                                            }
+                                                                        });
+                                                                    } else {
+                                                                        showCustomToast("Timetable is closed");
+                                                                    }
+
+                                                                } else {
+                                                                    showCustomToast("No weeks found");
+                                                                }
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError error) {
+                                                            try {
+                                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+                                                    });
+                                                } else {
+                                                    showCustomToast("Shop ID not found for this user");
+                                                }
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+                                            try {
+                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    });
+                                } else {
+                                    showCustomToast("User not logged");
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
         Tue2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                dialog.show();
+                // Hiển thị dialog để nhập dữ liệu
+                try {
+                    dialog.show();
+                    ip_shift_et.setText(Tue2.getText().toString());
 
+                    // Xử lý sự kiện khi người dùng nhấn vào nút add_shift_btn trong dialog
+                    add_shift_btn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            try {
+                                FirebaseUser user = mAuth.getCurrentUser();
+                                if (user != null) {
+                                    String userId = user.getUid();
+                                    String dataItem = ip_shift_et.getText().toString();
+                                    DatabaseReference userRef = firebaseDatabase.getReference().child("User").child(userId).child("shopID");
+                                    userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                            try {
+                                                String ownerShopId = snapshot.getValue(String.class);
+                                                if (ownerShopId != null) {
+                                                    DatabaseReference shopRef = firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("Calendar");
+
+                                                    shopRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                            try {
+                                                                // Lấy tất cả các tuần
+                                                                Iterable<DataSnapshot> weeks = dataSnapshot.getChildren();
+                                                                DataSnapshot lastWeekSnapshot = null;
+
+                                                                // Lặp qua tất cả các tuần và lưu lại tuần cuối cùng
+                                                                for (DataSnapshot weekSnapshot : weeks) {
+                                                                    lastWeekSnapshot = weekSnapshot;
+                                                                }
+
+                                                                if (lastWeekSnapshot != null) {
+                                                                    // Cập nhật dữ liệu của Sun3 trong tuần cuối cùng
+                                                                    DatabaseReference sun3Ref = lastWeekSnapshot.child("tue2").getRef();
+                                                                    String statusRef = lastWeekSnapshot.child("status").getValue(String.class);
+
+                                                                    if (statusRef != null && statusRef.equals("Opening")) {
+                                                                        sun3Ref.setValue(dataItem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                            @Override
+                                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                                try {
+                                                                                    if (task.isSuccessful()) {
+                                                                                        dialog.dismiss();
+                                                                                        showCustomToast("Timetable updated");
+                                                                                        Tue2.setText(dataItem);
+                                                                                    } else {
+                                                                                        showCustomToast("Timetable update failed");
+                                                                                    }
+                                                                                } catch (Exception e) {
+                                                                                    e.printStackTrace();
+                                                                                }
+                                                                            }
+                                                                        });
+                                                                    } else {
+                                                                        showCustomToast("Timetable is closed");
+                                                                    }
+
+                                                                } else {
+                                                                    showCustomToast("No weeks found");
+                                                                }
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError error) {
+                                                            try {
+                                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+                                                    });
+                                                } else {
+                                                    showCustomToast("Shop ID not found for this user");
+                                                }
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+                                            try {
+                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    });
+                                } else {
+                                    showCustomToast("User not logged");
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
         Tue3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                dialog.show();
+                // Hiển thị dialog để nhập dữ liệu
+                try {
+                    dialog.show();
+                    ip_shift_et.setText(Tue3.getText().toString());
 
+                    // Xử lý sự kiện khi người dùng nhấn vào nút add_shift_btn trong dialog
+                    add_shift_btn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            try {
+                                FirebaseUser user = mAuth.getCurrentUser();
+                                if (user != null) {
+                                    String userId = user.getUid();
+                                    String dataItem = ip_shift_et.getText().toString();
+                                    DatabaseReference userRef = firebaseDatabase.getReference().child("User").child(userId).child("shopID");
+                                    userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                            try {
+                                                String ownerShopId = snapshot.getValue(String.class);
+                                                if (ownerShopId != null) {
+                                                    DatabaseReference shopRef = firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("Calendar");
+
+                                                    shopRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                            try {
+                                                                // Lấy tất cả các tuần
+                                                                Iterable<DataSnapshot> weeks = dataSnapshot.getChildren();
+                                                                DataSnapshot lastWeekSnapshot = null;
+
+                                                                // Lặp qua tất cả các tuần và lưu lại tuần cuối cùng
+                                                                for (DataSnapshot weekSnapshot : weeks) {
+                                                                    lastWeekSnapshot = weekSnapshot;
+                                                                }
+
+                                                                if (lastWeekSnapshot != null) {
+                                                                    // Cập nhật dữ liệu của Sun3 trong tuần cuối cùng
+                                                                    DatabaseReference sun3Ref = lastWeekSnapshot.child("tue3").getRef();
+                                                                    String statusRef = lastWeekSnapshot.child("status").getValue(String.class);
+
+                                                                    if (statusRef != null && statusRef.equals("Opening")) {
+                                                                        sun3Ref.setValue(dataItem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                            @Override
+                                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                                try {
+                                                                                    if (task.isSuccessful()) {
+                                                                                        dialog.dismiss();
+                                                                                        showCustomToast("Timetable updated");
+                                                                                        Tue3.setText(dataItem);
+                                                                                    } else {
+                                                                                        showCustomToast("Timetable update failed");
+                                                                                    }
+                                                                                } catch (Exception e) {
+                                                                                    e.printStackTrace();
+                                                                                }
+                                                                            }
+                                                                        });
+                                                                    } else {
+                                                                        showCustomToast("Timetable is closed");
+                                                                    }
+
+                                                                } else {
+                                                                    showCustomToast("No weeks found");
+                                                                }
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError error) {
+                                                            try {
+                                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+                                                    });
+                                                } else {
+                                                    showCustomToast("Shop ID not found for this user");
+                                                }
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+                                            try {
+                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    });
+                                } else {
+                                    showCustomToast("User not logged");
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
         Wed1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                dialog.show();
+                // Hiển thị dialog để nhập dữ liệu
+                try {
+                    dialog.show();
+                    ip_shift_et.setText(Wed1.getText().toString());
 
+                    // Xử lý sự kiện khi người dùng nhấn vào nút add_shift_btn trong dialog
+                    add_shift_btn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            try {
+                                FirebaseUser user = mAuth.getCurrentUser();
+                                if (user != null) {
+                                    String userId = user.getUid();
+                                    String dataItem = ip_shift_et.getText().toString();
+                                    DatabaseReference userRef = firebaseDatabase.getReference().child("User").child(userId).child("shopID");
+                                    userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                            try {
+                                                String ownerShopId = snapshot.getValue(String.class);
+                                                if (ownerShopId != null) {
+                                                    DatabaseReference shopRef = firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("Calendar");
+
+                                                    shopRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                            try {
+                                                                // Lấy tất cả các tuần
+                                                                Iterable<DataSnapshot> weeks = dataSnapshot.getChildren();
+                                                                DataSnapshot lastWeekSnapshot = null;
+
+                                                                // Lặp qua tất cả các tuần và lưu lại tuần cuối cùng
+                                                                for (DataSnapshot weekSnapshot : weeks) {
+                                                                    lastWeekSnapshot = weekSnapshot;
+                                                                }
+
+                                                                if (lastWeekSnapshot != null) {
+                                                                    // Cập nhật dữ liệu của Sun3 trong tuần cuối cùng
+                                                                    DatabaseReference sun3Ref = lastWeekSnapshot.child("wed1").getRef();
+                                                                    String statusRef = lastWeekSnapshot.child("status").getValue(String.class);
+
+                                                                    if (statusRef != null && statusRef.equals("Opening")) {
+                                                                        sun3Ref.setValue(dataItem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                            @Override
+                                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                                try {
+                                                                                    if (task.isSuccessful()) {
+                                                                                        dialog.dismiss();
+                                                                                        showCustomToast("Timetable updated");
+                                                                                        Wed1.setText(dataItem);
+                                                                                    } else {
+                                                                                        showCustomToast("Timetable update failed");
+                                                                                    }
+                                                                                } catch (Exception e) {
+                                                                                    e.printStackTrace();
+                                                                                }
+                                                                            }
+                                                                        });
+                                                                    } else {
+                                                                        showCustomToast("Timetable is closed");
+                                                                    }
+
+                                                                } else {
+                                                                    showCustomToast("No weeks found");
+                                                                }
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError error) {
+                                                            try {
+                                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+                                                    });
+                                                } else {
+                                                    showCustomToast("Shop ID not found for this user");
+                                                }
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+                                            try {
+                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    });
+                                } else {
+                                    showCustomToast("User not logged");
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
         Wed2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                dialog.show();
+                // Hiển thị dialog để nhập dữ liệu
+                try {
+                    dialog.show();
+                    ip_shift_et.setText(Wed2.getText().toString());
 
+                    // Xử lý sự kiện khi người dùng nhấn vào nút add_shift_btn trong dialog
+                    add_shift_btn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            try {
+                                FirebaseUser user = mAuth.getCurrentUser();
+                                if (user != null) {
+                                    String userId = user.getUid();
+                                    String dataItem = ip_shift_et.getText().toString();
+                                    DatabaseReference userRef = firebaseDatabase.getReference().child("User").child(userId).child("shopID");
+                                    userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                            try {
+                                                String ownerShopId = snapshot.getValue(String.class);
+                                                if (ownerShopId != null) {
+                                                    DatabaseReference shopRef = firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("Calendar");
+
+                                                    shopRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                            try {
+                                                                // Lấy tất cả các tuần
+                                                                Iterable<DataSnapshot> weeks = dataSnapshot.getChildren();
+                                                                DataSnapshot lastWeekSnapshot = null;
+
+                                                                // Lặp qua tất cả các tuần và lưu lại tuần cuối cùng
+                                                                for (DataSnapshot weekSnapshot : weeks) {
+                                                                    lastWeekSnapshot = weekSnapshot;
+                                                                }
+
+                                                                if (lastWeekSnapshot != null) {
+                                                                    // Cập nhật dữ liệu của Sun3 trong tuần cuối cùng
+                                                                    DatabaseReference sun3Ref = lastWeekSnapshot.child("wed2").getRef();
+                                                                    String statusRef = lastWeekSnapshot.child("status").getValue(String.class);
+
+                                                                    if (statusRef != null && statusRef.equals("Opening")) {
+                                                                        sun3Ref.setValue(dataItem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                            @Override
+                                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                                try {
+                                                                                    if (task.isSuccessful()) {
+                                                                                        dialog.dismiss();
+                                                                                        showCustomToast("Timetable updated");
+                                                                                        Wed2.setText(dataItem);
+                                                                                    } else {
+                                                                                        showCustomToast("Timetable update failed");
+                                                                                    }
+                                                                                } catch (Exception e) {
+                                                                                    e.printStackTrace();
+                                                                                }
+                                                                            }
+                                                                        });
+                                                                    } else {
+                                                                        showCustomToast("Timetable is closed");
+                                                                    }
+
+                                                                } else {
+                                                                    showCustomToast("No weeks found");
+                                                                }
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError error) {
+                                                            try {
+                                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+                                                    });
+                                                } else {
+                                                    showCustomToast("Shop ID not found for this user");
+                                                }
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+                                            try {
+                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    });
+                                } else {
+                                    showCustomToast("User not logged");
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
         Wed3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                dialog.show();
+                // Hiển thị dialog để nhập dữ liệu
+                try {
+                    dialog.show();
+                    ip_shift_et.setText(Wed3.getText().toString());
 
+                    // Xử lý sự kiện khi người dùng nhấn vào nút add_shift_btn trong dialog
+                    add_shift_btn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            try {
+                                FirebaseUser user = mAuth.getCurrentUser();
+                                if (user != null) {
+                                    String userId = user.getUid();
+                                    String dataItem = ip_shift_et.getText().toString();
+                                    DatabaseReference userRef = firebaseDatabase.getReference().child("User").child(userId).child("shopID");
+                                    userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                            try {
+                                                String ownerShopId = snapshot.getValue(String.class);
+                                                if (ownerShopId != null) {
+                                                    DatabaseReference shopRef = firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("Calendar");
+
+                                                    shopRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                            try {
+                                                                // Lấy tất cả các tuần
+                                                                Iterable<DataSnapshot> weeks = dataSnapshot.getChildren();
+                                                                DataSnapshot lastWeekSnapshot = null;
+
+                                                                // Lặp qua tất cả các tuần và lưu lại tuần cuối cùng
+                                                                for (DataSnapshot weekSnapshot : weeks) {
+                                                                    lastWeekSnapshot = weekSnapshot;
+                                                                }
+
+                                                                if (lastWeekSnapshot != null) {
+                                                                    // Cập nhật dữ liệu của Sun3 trong tuần cuối cùng
+                                                                    DatabaseReference sun3Ref = lastWeekSnapshot.child("wed3").getRef();
+                                                                    String statusRef = lastWeekSnapshot.child("status").getValue(String.class);
+
+                                                                    if (statusRef != null && statusRef.equals("Opening")) {
+                                                                        sun3Ref.setValue(dataItem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                            @Override
+                                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                                try {
+                                                                                    if (task.isSuccessful()) {
+                                                                                        dialog.dismiss();
+                                                                                        showCustomToast("Timetable updated");
+                                                                                        Wed3.setText(dataItem);
+                                                                                    } else {
+                                                                                        showCustomToast("Timetable update failed");
+                                                                                    }
+                                                                                } catch (Exception e) {
+                                                                                    e.printStackTrace();
+                                                                                }
+                                                                            }
+                                                                        });
+                                                                    } else {
+                                                                        showCustomToast("Timetable is closed");
+                                                                    }
+
+                                                                } else {
+                                                                    showCustomToast("No weeks found");
+                                                                }
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError error) {
+                                                            try {
+                                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+                                                    });
+                                                } else {
+                                                    showCustomToast("Shop ID not found for this user");
+                                                }
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+                                            try {
+                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    });
+                                } else {
+                                    showCustomToast("User not logged");
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
         Thu1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                dialog.show();
+                // Hiển thị dialog để nhập dữ liệu
+                try {
+                    dialog.show();
+                    ip_shift_et.setText(Thu3.getText().toString());
 
+                    // Xử lý sự kiện khi người dùng nhấn vào nút add_shift_btn trong dialog
+                    add_shift_btn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            try {
+                                FirebaseUser user = mAuth.getCurrentUser();
+                                if (user != null) {
+                                    String userId = user.getUid();
+                                    String dataItem = ip_shift_et.getText().toString();
+                                    DatabaseReference userRef = firebaseDatabase.getReference().child("User").child(userId).child("shopID");
+                                    userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                            try {
+                                                String ownerShopId = snapshot.getValue(String.class);
+                                                if (ownerShopId != null) {
+                                                    DatabaseReference shopRef = firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("Calendar");
+
+                                                    shopRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                            try {
+                                                                // Lấy tất cả các tuần
+                                                                Iterable<DataSnapshot> weeks = dataSnapshot.getChildren();
+                                                                DataSnapshot lastWeekSnapshot = null;
+
+                                                                // Lặp qua tất cả các tuần và lưu lại tuần cuối cùng
+                                                                for (DataSnapshot weekSnapshot : weeks) {
+                                                                    lastWeekSnapshot = weekSnapshot;
+                                                                }
+
+                                                                if (lastWeekSnapshot != null) {
+                                                                    // Cập nhật dữ liệu của Sun3 trong tuần cuối cùng
+                                                                    DatabaseReference sun3Ref = lastWeekSnapshot.child("thu1").getRef();
+                                                                    String statusRef = lastWeekSnapshot.child("status").getValue(String.class);
+
+                                                                    if (statusRef != null && statusRef.equals("Opening")) {
+                                                                        sun3Ref.setValue(dataItem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                            @Override
+                                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                                try {
+                                                                                    if (task.isSuccessful()) {
+                                                                                        dialog.dismiss();
+                                                                                        showCustomToast("Timetable updated");
+                                                                                        Thu1.setText(dataItem);
+                                                                                    } else {
+                                                                                        showCustomToast("Timetable update failed");
+                                                                                    }
+                                                                                } catch (Exception e) {
+                                                                                    e.printStackTrace();
+                                                                                }
+                                                                            }
+                                                                        });
+                                                                    } else {
+                                                                        showCustomToast("Timetable is closed");
+                                                                    }
+
+                                                                } else {
+                                                                    showCustomToast("No weeks found");
+                                                                }
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError error) {
+                                                            try {
+                                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+                                                    });
+                                                } else {
+                                                    showCustomToast("Shop ID not found for this user");
+                                                }
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+                                            try {
+                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    });
+                                } else {
+                                    showCustomToast("User not logged");
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
         Thu2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                dialog.show();
+                // Hiển thị dialog để nhập dữ liệu
+                try {
+                    dialog.show();
+                    ip_shift_et.setText(Thu2.getText().toString());
 
+                    // Xử lý sự kiện khi người dùng nhấn vào nút add_shift_btn trong dialog
+                    add_shift_btn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            try {
+                                FirebaseUser user = mAuth.getCurrentUser();
+                                if (user != null) {
+                                    String userId = user.getUid();
+                                    String dataItem = ip_shift_et.getText().toString();
+                                    DatabaseReference userRef = firebaseDatabase.getReference().child("User").child(userId).child("shopID");
+                                    userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                            try {
+                                                String ownerShopId = snapshot.getValue(String.class);
+                                                if (ownerShopId != null) {
+                                                    DatabaseReference shopRef = firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("Calendar");
+
+                                                    shopRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                            try {
+                                                                // Lấy tất cả các tuần
+                                                                Iterable<DataSnapshot> weeks = dataSnapshot.getChildren();
+                                                                DataSnapshot lastWeekSnapshot = null;
+
+                                                                // Lặp qua tất cả các tuần và lưu lại tuần cuối cùng
+                                                                for (DataSnapshot weekSnapshot : weeks) {
+                                                                    lastWeekSnapshot = weekSnapshot;
+                                                                }
+
+                                                                if (lastWeekSnapshot != null) {
+                                                                    // Cập nhật dữ liệu của Sun3 trong tuần cuối cùng
+                                                                    DatabaseReference sun3Ref = lastWeekSnapshot.child("thu2").getRef();
+                                                                    String statusRef = lastWeekSnapshot.child("status").getValue(String.class);
+
+                                                                    if (statusRef != null && statusRef.equals("Opening")) {
+                                                                        sun3Ref.setValue(dataItem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                            @Override
+                                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                                try {
+                                                                                    if (task.isSuccessful()) {
+                                                                                        dialog.dismiss();
+                                                                                        showCustomToast("Timetable updated");
+                                                                                        Thu2.setText(dataItem);
+                                                                                    } else {
+                                                                                        showCustomToast("Timetable update failed");
+                                                                                    }
+                                                                                } catch (Exception e) {
+                                                                                    e.printStackTrace();
+                                                                                }
+                                                                            }
+                                                                        });
+                                                                    } else {
+                                                                        showCustomToast("Timetable is closed");
+                                                                    }
+
+                                                                } else {
+                                                                    showCustomToast("No weeks found");
+                                                                }
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError error) {
+                                                            try {
+                                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+                                                    });
+                                                } else {
+                                                    showCustomToast("Shop ID not found for this user");
+                                                }
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+                                            try {
+                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    });
+                                } else {
+                                    showCustomToast("User not logged");
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
         Thu3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                dialog.show();
+                // Hiển thị dialog để nhập dữ liệu
+                try {
+                    dialog.show();
+                    ip_shift_et.setText(Thu3.getText().toString());
 
+                    // Xử lý sự kiện khi người dùng nhấn vào nút add_shift_btn trong dialog
+                    add_shift_btn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            try {
+                                FirebaseUser user = mAuth.getCurrentUser();
+                                if (user != null) {
+                                    String userId = user.getUid();
+                                    String dataItem = ip_shift_et.getText().toString();
+                                    DatabaseReference userRef = firebaseDatabase.getReference().child("User").child(userId).child("shopID");
+                                    userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                            try {
+                                                String ownerShopId = snapshot.getValue(String.class);
+                                                if (ownerShopId != null) {
+                                                    DatabaseReference shopRef = firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("Calendar");
+
+                                                    shopRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                            try {
+                                                                // Lấy tất cả các tuần
+                                                                Iterable<DataSnapshot> weeks = dataSnapshot.getChildren();
+                                                                DataSnapshot lastWeekSnapshot = null;
+
+                                                                // Lặp qua tất cả các tuần và lưu lại tuần cuối cùng
+                                                                for (DataSnapshot weekSnapshot : weeks) {
+                                                                    lastWeekSnapshot = weekSnapshot;
+                                                                }
+
+                                                                if (lastWeekSnapshot != null) {
+                                                                    // Cập nhật dữ liệu của Sun3 trong tuần cuối cùng
+                                                                    DatabaseReference sun3Ref = lastWeekSnapshot.child("thu3").getRef();
+                                                                    String statusRef = lastWeekSnapshot.child("status").getValue(String.class);
+
+                                                                    if (statusRef != null && statusRef.equals("Opening")) {
+                                                                        sun3Ref.setValue(dataItem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                            @Override
+                                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                                try {
+                                                                                    if (task.isSuccessful()) {
+                                                                                        dialog.dismiss();
+                                                                                        showCustomToast("Timetable updated");
+                                                                                        Thu3.setText(dataItem);
+                                                                                    } else {
+                                                                                        showCustomToast("Timetable update failed");
+                                                                                    }
+                                                                                } catch (Exception e) {
+                                                                                    e.printStackTrace();
+                                                                                }
+                                                                            }
+                                                                        });
+                                                                    } else {
+                                                                        showCustomToast("Timetable is closed");
+                                                                    }
+
+                                                                } else {
+                                                                    showCustomToast("No weeks found");
+                                                                }
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError error) {
+                                                            try {
+                                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+                                                    });
+                                                } else {
+                                                    showCustomToast("Shop ID not found for this user");
+                                                }
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+                                            try {
+                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    });
+                                } else {
+                                    showCustomToast("User not logged");
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
         Fri1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                dialog.show();
+                // Hiển thị dialog để nhập dữ liệu
+                try {
+                    dialog.show();
+                    ip_shift_et.setText(Fri1.getText().toString());
 
+                    // Xử lý sự kiện khi người dùng nhấn vào nút add_shift_btn trong dialog
+                    add_shift_btn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            try {
+                                FirebaseUser user = mAuth.getCurrentUser();
+                                if (user != null) {
+                                    String userId = user.getUid();
+                                    String dataItem = ip_shift_et.getText().toString();
+                                    DatabaseReference userRef = firebaseDatabase.getReference().child("User").child(userId).child("shopID");
+                                    userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                            try {
+                                                String ownerShopId = snapshot.getValue(String.class);
+                                                if (ownerShopId != null) {
+                                                    DatabaseReference shopRef = firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("Calendar");
+
+                                                    shopRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                            try {
+                                                                // Lấy tất cả các tuần
+                                                                Iterable<DataSnapshot> weeks = dataSnapshot.getChildren();
+                                                                DataSnapshot lastWeekSnapshot = null;
+
+                                                                // Lặp qua tất cả các tuần và lưu lại tuần cuối cùng
+                                                                for (DataSnapshot weekSnapshot : weeks) {
+                                                                    lastWeekSnapshot = weekSnapshot;
+                                                                }
+
+                                                                if (lastWeekSnapshot != null) {
+                                                                    // Cập nhật dữ liệu của Sun3 trong tuần cuối cùng
+                                                                    DatabaseReference sun3Ref = lastWeekSnapshot.child("fri1").getRef();
+                                                                    String statusRef = lastWeekSnapshot.child("status").getValue(String.class);
+
+                                                                    if (statusRef != null && statusRef.equals("Opening")) {
+                                                                        sun3Ref.setValue(dataItem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                            @Override
+                                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                                try {
+                                                                                    if (task.isSuccessful()) {
+                                                                                        dialog.dismiss();
+                                                                                        showCustomToast("Timetable updated");
+                                                                                        Fri1.setText(dataItem);
+                                                                                    } else {
+                                                                                        showCustomToast("Timetable update failed");
+                                                                                    }
+                                                                                } catch (Exception e) {
+                                                                                    e.printStackTrace();
+                                                                                }
+                                                                            }
+                                                                        });
+                                                                    } else {
+                                                                        showCustomToast("Timetable is closed");
+                                                                    }
+
+                                                                } else {
+                                                                    showCustomToast("No weeks found");
+                                                                }
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError error) {
+                                                            try {
+                                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+                                                    });
+                                                } else {
+                                                    showCustomToast("Shop ID not found for this user");
+                                                }
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+                                            try {
+                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    });
+                                } else {
+                                    showCustomToast("User not logged");
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
         Fri2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                dialog.show();
-                ip_shift_et.setText(Fri2.getText().toString());
+                // Hiển thị dialog để nhập dữ liệu
+                try {
+                    dialog.show();
+                    ip_shift_et.setText(Fri2.getText().toString());
 
+                    // Xử lý sự kiện khi người dùng nhấn vào nút add_shift_btn trong dialog
+                    add_shift_btn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            try {
+                                FirebaseUser user = mAuth.getCurrentUser();
+                                if (user != null) {
+                                    String userId = user.getUid();
+                                    String dataItem = ip_shift_et.getText().toString();
+                                    DatabaseReference userRef = firebaseDatabase.getReference().child("User").child(userId).child("shopID");
+                                    userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                            try {
+                                                String ownerShopId = snapshot.getValue(String.class);
+                                                if (ownerShopId != null) {
+                                                    DatabaseReference shopRef = firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("Calendar");
+
+                                                    shopRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                            try {
+                                                                // Lấy tất cả các tuần
+                                                                Iterable<DataSnapshot> weeks = dataSnapshot.getChildren();
+                                                                DataSnapshot lastWeekSnapshot = null;
+
+                                                                // Lặp qua tất cả các tuần và lưu lại tuần cuối cùng
+                                                                for (DataSnapshot weekSnapshot : weeks) {
+                                                                    lastWeekSnapshot = weekSnapshot;
+                                                                }
+
+                                                                if (lastWeekSnapshot != null) {
+                                                                    // Cập nhật dữ liệu của Sun3 trong tuần cuối cùng
+                                                                    DatabaseReference sun3Ref = lastWeekSnapshot.child("fri2").getRef();
+                                                                    String statusRef = lastWeekSnapshot.child("status").getValue(String.class);
+
+                                                                    if (statusRef != null && statusRef.equals("Opening")) {
+                                                                        sun3Ref.setValue(dataItem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                            @Override
+                                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                                try {
+                                                                                    if (task.isSuccessful()) {
+                                                                                        dialog.dismiss();
+                                                                                        showCustomToast("Timetable updated");
+                                                                                        Fri2.setText(dataItem);
+                                                                                    } else {
+                                                                                        showCustomToast("Timetable update failed");
+                                                                                    }
+                                                                                } catch (Exception e) {
+                                                                                    e.printStackTrace();
+                                                                                }
+                                                                            }
+                                                                        });
+                                                                    } else {
+                                                                        showCustomToast("Timetable is closed");
+                                                                    }
+
+                                                                } else {
+                                                                    showCustomToast("No weeks found");
+                                                                }
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError error) {
+                                                            try {
+                                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+                                                    });
+                                                } else {
+                                                    showCustomToast("Shop ID not found for this user");
+                                                }
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+                                            try {
+                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    });
+                                } else {
+                                    showCustomToast("User not logged");
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
         Fri3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                dialog.show();
+                // Hiển thị dialog để nhập dữ liệu
+                try {
+                    dialog.show();
+                    ip_shift_et.setText(Fri3.getText().toString());
 
+                    // Xử lý sự kiện khi người dùng nhấn vào nút add_shift_btn trong dialog
+                    add_shift_btn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            try {
+                                FirebaseUser user = mAuth.getCurrentUser();
+                                if (user != null) {
+                                    String userId = user.getUid();
+                                    String dataItem = ip_shift_et.getText().toString();
+                                    DatabaseReference userRef = firebaseDatabase.getReference().child("User").child(userId).child("shopID");
+                                    userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                            try {
+                                                String ownerShopId = snapshot.getValue(String.class);
+                                                if (ownerShopId != null) {
+                                                    DatabaseReference shopRef = firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("Calendar");
+
+                                                    shopRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                            try {
+                                                                // Lấy tất cả các tuần
+                                                                Iterable<DataSnapshot> weeks = dataSnapshot.getChildren();
+                                                                DataSnapshot lastWeekSnapshot = null;
+
+                                                                // Lặp qua tất cả các tuần và lưu lại tuần cuối cùng
+                                                                for (DataSnapshot weekSnapshot : weeks) {
+                                                                    lastWeekSnapshot = weekSnapshot;
+                                                                }
+
+                                                                if (lastWeekSnapshot != null) {
+                                                                    // Cập nhật dữ liệu của Sun3 trong tuần cuối cùng
+                                                                    DatabaseReference sun3Ref = lastWeekSnapshot.child("fri3").getRef();
+                                                                    String statusRef = lastWeekSnapshot.child("status").getValue(String.class);
+
+                                                                    if (statusRef != null && statusRef.equals("Opening")) {
+                                                                        sun3Ref.setValue(dataItem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                            @Override
+                                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                                try {
+                                                                                    if (task.isSuccessful()) {
+                                                                                        dialog.dismiss();
+                                                                                        showCustomToast("Timetable updated");
+                                                                                        Fri3.setText(dataItem);
+                                                                                    } else {
+                                                                                        showCustomToast("Timetable update failed");
+                                                                                    }
+                                                                                } catch (Exception e) {
+                                                                                    e.printStackTrace();
+                                                                                }
+                                                                            }
+                                                                        });
+                                                                    } else {
+                                                                        showCustomToast("Timetable is closed");
+                                                                    }
+
+                                                                } else {
+                                                                    showCustomToast("No weeks found");
+                                                                }
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError error) {
+                                                            try {
+                                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+                                                    });
+                                                } else {
+                                                    showCustomToast("Shop ID not found for this user");
+                                                }
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+                                            try {
+                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    });
+                                } else {
+                                    showCustomToast("User not logged");
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
         Sat1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                dialog.show();
+                // Hiển thị dialog để nhập dữ liệu
+                try {
+                    dialog.show();
+                    ip_shift_et.setText(Sat1.getText().toString());
 
+                    // Xử lý sự kiện khi người dùng nhấn vào nút add_shift_btn trong dialog
+                    add_shift_btn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            try {
+                                FirebaseUser user = mAuth.getCurrentUser();
+                                if (user != null) {
+                                    String userId = user.getUid();
+                                    String dataItem = ip_shift_et.getText().toString();
+                                    DatabaseReference userRef = firebaseDatabase.getReference().child("User").child(userId).child("shopID");
+                                    userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                            try {
+                                                String ownerShopId = snapshot.getValue(String.class);
+                                                if (ownerShopId != null) {
+                                                    DatabaseReference shopRef = firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("Calendar");
+
+                                                    shopRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                            try {
+                                                                // Lấy tất cả các tuần
+                                                                Iterable<DataSnapshot> weeks = dataSnapshot.getChildren();
+                                                                DataSnapshot lastWeekSnapshot = null;
+
+                                                                // Lặp qua tất cả các tuần và lưu lại tuần cuối cùng
+                                                                for (DataSnapshot weekSnapshot : weeks) {
+                                                                    lastWeekSnapshot = weekSnapshot;
+                                                                }
+
+                                                                if (lastWeekSnapshot != null) {
+                                                                    // Cập nhật dữ liệu của Sun3 trong tuần cuối cùng
+                                                                    DatabaseReference sun3Ref = lastWeekSnapshot.child("sat1").getRef();
+                                                                    String statusRef = lastWeekSnapshot.child("status").getValue(String.class);
+
+                                                                    if (statusRef != null && statusRef.equals("Opening")) {
+                                                                        sun3Ref.setValue(dataItem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                            @Override
+                                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                                try {
+                                                                                    if (task.isSuccessful()) {
+                                                                                        dialog.dismiss();
+                                                                                        showCustomToast("Timetable updated");
+                                                                                        Sat1.setText(dataItem);
+                                                                                    } else {
+                                                                                        showCustomToast("Timetable update failed");
+                                                                                    }
+                                                                                } catch (Exception e) {
+                                                                                    e.printStackTrace();
+                                                                                }
+                                                                            }
+                                                                        });
+                                                                    } else {
+                                                                        showCustomToast("Timetable is closed");
+                                                                    }
+
+                                                                } else {
+                                                                    showCustomToast("No weeks found");
+                                                                }
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError error) {
+                                                            try {
+                                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+                                                    });
+                                                } else {
+                                                    showCustomToast("Shop ID not found for this user");
+                                                }
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+                                            try {
+                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    });
+                                } else {
+                                    showCustomToast("User not logged");
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
         Sat2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                dialog.show();
+                // Hiển thị dialog để nhập dữ liệu
+                try {
+                    dialog.show();
+                    ip_shift_et.setText(Sat2.getText().toString());
 
+                    // Xử lý sự kiện khi người dùng nhấn vào nút add_shift_btn trong dialog
+                    add_shift_btn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            try {
+                                FirebaseUser user = mAuth.getCurrentUser();
+                                if (user != null) {
+                                    String userId = user.getUid();
+                                    String dataItem = ip_shift_et.getText().toString();
+                                    DatabaseReference userRef = firebaseDatabase.getReference().child("User").child(userId).child("shopID");
+                                    userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                            try {
+                                                String ownerShopId = snapshot.getValue(String.class);
+                                                if (ownerShopId != null) {
+                                                    DatabaseReference shopRef = firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("Calendar");
+
+                                                    shopRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                            try {
+                                                                // Lấy tất cả các tuần
+                                                                Iterable<DataSnapshot> weeks = dataSnapshot.getChildren();
+                                                                DataSnapshot lastWeekSnapshot = null;
+
+                                                                // Lặp qua tất cả các tuần và lưu lại tuần cuối cùng
+                                                                for (DataSnapshot weekSnapshot : weeks) {
+                                                                    lastWeekSnapshot = weekSnapshot;
+                                                                }
+
+                                                                if (lastWeekSnapshot != null) {
+                                                                    // Cập nhật dữ liệu của Sun3 trong tuần cuối cùng
+                                                                    DatabaseReference sun3Ref = lastWeekSnapshot.child("sat2").getRef();
+                                                                    String statusRef = lastWeekSnapshot.child("status").getValue(String.class);
+
+                                                                    if (statusRef != null && statusRef.equals("Opening")) {
+                                                                        sun3Ref.setValue(dataItem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                            @Override
+                                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                                try {
+                                                                                    if (task.isSuccessful()) {
+                                                                                        dialog.dismiss();
+                                                                                        showCustomToast("Timetable updated");
+                                                                                        Sat2.setText(dataItem);
+                                                                                    } else {
+                                                                                        showCustomToast("Timetable update failed");
+                                                                                    }
+                                                                                } catch (Exception e) {
+                                                                                    e.printStackTrace();
+                                                                                }
+                                                                            }
+                                                                        });
+                                                                    } else {
+                                                                        showCustomToast("Timetable is closed");
+                                                                    }
+
+                                                                } else {
+                                                                    showCustomToast("No weeks found");
+                                                                }
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError error) {
+                                                            try {
+                                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+                                                    });
+                                                } else {
+                                                    showCustomToast("Shop ID not found for this user");
+                                                }
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+                                            try {
+                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    });
+                                } else {
+                                    showCustomToast("User not logged");
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
         Sat3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                dialog.show();
+                // Hiển thị dialog để nhập dữ liệu
+                try {
+                    dialog.show();
+                    ip_shift_et.setText(Sat3.getText().toString());
+
+                    // Xử lý sự kiện khi người dùng nhấn vào nút add_shift_btn trong dialog
+                    add_shift_btn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            try {
+                                FirebaseUser user = mAuth.getCurrentUser();
+                                if (user != null) {
+                                    String userId = user.getUid();
+                                    String dataItem = ip_shift_et.getText().toString();
+                                    DatabaseReference userRef = firebaseDatabase.getReference().child("User").child(userId).child("shopID");
+                                    userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                            try {
+                                                String ownerShopId = snapshot.getValue(String.class);
+                                                if (ownerShopId != null) {
+                                                    DatabaseReference shopRef = firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("Calendar");
+
+                                                    shopRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                            try {
+                                                                // Lấy tất cả các tuần
+                                                                Iterable<DataSnapshot> weeks = dataSnapshot.getChildren();
+                                                                DataSnapshot lastWeekSnapshot = null;
+
+                                                                // Lặp qua tất cả các tuần và lưu lại tuần cuối cùng
+                                                                for (DataSnapshot weekSnapshot : weeks) {
+                                                                    lastWeekSnapshot = weekSnapshot;
+                                                                }
+
+                                                                if (lastWeekSnapshot != null) {
+                                                                    // Cập nhật dữ liệu của Sun3 trong tuần cuối cùng
+                                                                    DatabaseReference sun3Ref = lastWeekSnapshot.child("sat3").getRef();
+                                                                    String statusRef = lastWeekSnapshot.child("status").getValue(String.class);
+
+                                                                    if (statusRef != null && statusRef.equals("Opening")) {
+                                                                        sun3Ref.setValue(dataItem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                            @Override
+                                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                                try {
+                                                                                    if (task.isSuccessful()) {
+                                                                                        dialog.dismiss();
+                                                                                        showCustomToast("Timetable updated");
+                                                                                        Sat3.setText(dataItem);
+                                                                                    } else {
+                                                                                        showCustomToast("Timetable update failed");
+                                                                                    }
+                                                                                } catch (Exception e) {
+                                                                                    e.printStackTrace();
+                                                                                }
+                                                                            }
+                                                                        });
+                                                                    } else {
+                                                                        showCustomToast("Timetable is closed");
+                                                                    }
+
+                                                                } else {
+                                                                    showCustomToast("No weeks found");
+                                                                }
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError error) {
+                                                            try {
+                                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+                                                    });
+                                                } else {
+                                                    showCustomToast("Shop ID not found for this user");
+                                                }
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+                                            try {
+                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    });
+                                } else {
+                                    showCustomToast("User not logged");
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
         Sun1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                dialog.show();
+                // Hiển thị dialog để nhập dữ liệu
+                try {
+                    dialog.show();
+                    ip_shift_et.setText(Sun1.getText().toString());
 
+                    // Xử lý sự kiện khi người dùng nhấn vào nút add_shift_btn trong dialog
+                    add_shift_btn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            try {
+                                FirebaseUser user = mAuth.getCurrentUser();
+                                if (user != null) {
+                                    String userId = user.getUid();
+                                    String dataItem = ip_shift_et.getText().toString();
+                                    DatabaseReference userRef = firebaseDatabase.getReference().child("User").child(userId).child("shopID");
+                                    userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                            try {
+                                                String ownerShopId = snapshot.getValue(String.class);
+                                                if (ownerShopId != null) {
+                                                    DatabaseReference shopRef = firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("Calendar");
+
+                                                    shopRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                            try {
+                                                                // Lấy tất cả các tuần
+                                                                Iterable<DataSnapshot> weeks = dataSnapshot.getChildren();
+                                                                DataSnapshot lastWeekSnapshot = null;
+
+                                                                // Lặp qua tất cả các tuần và lưu lại tuần cuối cùng
+                                                                for (DataSnapshot weekSnapshot : weeks) {
+                                                                    lastWeekSnapshot = weekSnapshot;
+                                                                }
+
+                                                                if (lastWeekSnapshot != null) {
+                                                                    // Cập nhật dữ liệu của Sun3 trong tuần cuối cùng
+                                                                    DatabaseReference sun3Ref = lastWeekSnapshot.child("sun1").getRef();
+                                                                    String statusRef = lastWeekSnapshot.child("status").getValue(String.class);
+
+                                                                    if (statusRef != null && statusRef.equals("Opening")) {
+                                                                        sun3Ref.setValue(dataItem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                            @Override
+                                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                                try {
+                                                                                    if (task.isSuccessful()) {
+                                                                                        dialog.dismiss();
+                                                                                        showCustomToast("Timetable updated");
+                                                                                        Sun1.setText(dataItem);
+                                                                                    } else {
+                                                                                        showCustomToast("Timetable update failed");
+                                                                                    }
+                                                                                } catch (Exception e) {
+                                                                                    e.printStackTrace();
+                                                                                }
+                                                                            }
+                                                                        });
+                                                                    } else {
+                                                                        showCustomToast("Timetable is closed");
+                                                                    }
+
+                                                                } else {
+                                                                    showCustomToast("No weeks found");
+                                                                }
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError error) {
+                                                            try {
+                                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+                                                    });
+                                                } else {
+                                                    showCustomToast("Shop ID not found for this user");
+                                                }
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+                                            try {
+                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    });
+                                } else {
+                                    showCustomToast("User not logged");
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
         Sun2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                dialog.show();
+                // Hiển thị dialog để nhập dữ liệu
+                try {
+                    dialog.show();
+                    ip_shift_et.setText(Sun2.getText().toString());
 
+                    // Xử lý sự kiện khi người dùng nhấn vào nút add_shift_btn trong dialog
+                    add_shift_btn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            try {
+                                FirebaseUser user = mAuth.getCurrentUser();
+                                if (user != null) {
+                                    String userId = user.getUid();
+                                    String dataItem = ip_shift_et.getText().toString();
+                                    DatabaseReference userRef = firebaseDatabase.getReference().child("User").child(userId).child("shopID");
+                                    userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                            try {
+                                                String ownerShopId = snapshot.getValue(String.class);
+                                                if (ownerShopId != null) {
+                                                    DatabaseReference shopRef = firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("Calendar");
+
+                                                    shopRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                            try {
+                                                                // Lấy tất cả các tuần
+                                                                Iterable<DataSnapshot> weeks = dataSnapshot.getChildren();
+                                                                DataSnapshot lastWeekSnapshot = null;
+
+                                                                // Lặp qua tất cả các tuần và lưu lại tuần cuối cùng
+                                                                for (DataSnapshot weekSnapshot : weeks) {
+                                                                    lastWeekSnapshot = weekSnapshot;
+                                                                }
+
+                                                                if (lastWeekSnapshot != null) {
+                                                                    // Cập nhật dữ liệu của Sun3 trong tuần cuối cùng
+                                                                    DatabaseReference sun3Ref = lastWeekSnapshot.child("sun2").getRef();
+                                                                    String statusRef = lastWeekSnapshot.child("status").getValue(String.class);
+
+                                                                    if (statusRef != null && statusRef.equals("Opening")) {
+                                                                        sun3Ref.setValue(dataItem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                            @Override
+                                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                                try {
+                                                                                    if (task.isSuccessful()) {
+                                                                                        dialog.dismiss();
+                                                                                        showCustomToast("Timetable updated");
+                                                                                        Sun2.setText(dataItem);
+                                                                                    } else {
+                                                                                        showCustomToast("Timetable update failed");
+                                                                                    }
+                                                                                } catch (Exception e) {
+                                                                                    e.printStackTrace();
+                                                                                }
+                                                                            }
+                                                                        });
+                                                                    } else {
+                                                                        showCustomToast("Timetable is closed");
+                                                                    }
+
+                                                                } else {
+                                                                    showCustomToast("No weeks found");
+                                                                }
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError error) {
+                                                            try {
+                                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+                                                    });
+                                                } else {
+                                                    showCustomToast("Shop ID not found for this user");
+                                                }
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+                                            try {
+                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    });
+                                } else {
+                                    showCustomToast("User not logged");
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
 
@@ -601,303 +2701,115 @@ public class StaffCalendarFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 // Hiển thị dialog để nhập dữ liệu
-                dialog.show();
-                ip_shift_et.setText(Sun3.getText().toString());
+                try {
+                    dialog.show();
+                    ip_shift_et.setText(Sun3.getText().toString());
 
-                // Xử lý sự kiện khi người dùng nhấn vào nút add_shift_btn trong dialog
-                add_shift_btn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        FirebaseUser user = mAuth.getCurrentUser();
-                        if (user != null) {
-                            String userId = user.getUid();
-                            String dataItem = ip_shift_et.getText().toString();
-                            DatabaseReference userRef = firebaseDatabase.getReference().child("User").child(userId).child("shopID");
-                            userRef.addValueEventListener(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    String ownerShopId = snapshot.getValue(String.class);
-                                    if (ownerShopId != null) {
-                                        DatabaseReference shopRef = firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("Calendar");
+                    // Xử lý sự kiện khi người dùng nhấn vào nút add_shift_btn trong dialog
+                    add_shift_btn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            try {
+                                FirebaseUser user = mAuth.getCurrentUser();
+                                if (user != null) {
+                                    String userId = user.getUid();
+                                    String dataItem = ip_shift_et.getText().toString();
+                                    DatabaseReference userRef = firebaseDatabase.getReference().child("User").child(userId).child("shopID");
+                                    userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                            try {
+                                                String ownerShopId = snapshot.getValue(String.class);
+                                                if (ownerShopId != null) {
+                                                    DatabaseReference shopRef = firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("Calendar");
 
-                                        shopRef.addValueEventListener(new ValueEventListener() {
-                                            @Override
-                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                    shopRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                            try {
+                                                                // Lấy tất cả các tuần
+                                                                Iterable<DataSnapshot> weeks = dataSnapshot.getChildren();
+                                                                DataSnapshot lastWeekSnapshot = null;
 
-                                                // Lấy tất cả các tuần
-                                                Iterable<DataSnapshot> weeks = dataSnapshot.getChildren();
-                                                DataSnapshot lastWeekSnapshot = null;
-
-                                                // Lặp qua tất cả các tuần và lưu lại tuần cuối cùng
-                                                for (DataSnapshot weekSnapshot : weeks) {
-                                                    lastWeekSnapshot = weekSnapshot;
-                                                }
-
-                                                if (lastWeekSnapshot != null) {
-                                                    // Cập nhật dữ liệu của Sun3 trong tuần cuối cùng
-                                                    DatabaseReference sun3Ref = lastWeekSnapshot.child("sun3").getRef();
-                                                    String statusRef = lastWeekSnapshot.child("status").getValue(String.class);
-
-                                                    if (statusRef != null && statusRef.equals("Opening")){
-                                                        sun3Ref.setValue(dataItem).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                            @Override
-                                                            public void onComplete(@NonNull Task<Void> task) {
-                                                                if (task.isSuccessful()) {
-                                                                    dialog.dismiss();
-                                                                    Toast.makeText(getContext(), "Added Successfully", Toast.LENGTH_SHORT).show();
-                                                                    Sun3.setText(dataItem);
-                                                                } else {
-                                                                    Toast.makeText(getContext(), "Failed to add data", Toast.LENGTH_SHORT).show();
+                                                                // Lặp qua tất cả các tuần và lưu lại tuần cuối cùng
+                                                                for (DataSnapshot weekSnapshot : weeks) {
+                                                                    lastWeekSnapshot = weekSnapshot;
                                                                 }
+
+                                                                if (lastWeekSnapshot != null) {
+                                                                    // Cập nhật dữ liệu của Sun3 trong tuần cuối cùng
+                                                                    DatabaseReference sun3Ref = lastWeekSnapshot.child("sun3").getRef();
+                                                                    String statusRef = lastWeekSnapshot.child("status").getValue(String.class);
+
+                                                                    if (statusRef != null && statusRef.equals("Opening")) {
+                                                                        sun3Ref.setValue(dataItem).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                            @Override
+                                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                                try {
+                                                                                    if (task.isSuccessful()) {
+                                                                                        dialog.dismiss();
+                                                                                        showCustomToast("Timetable updated");
+                                                                                        Sun3.setText(dataItem);
+                                                                                    } else {
+                                                                                        showCustomToast("Timetable update failed");
+                                                                                    }
+                                                                                } catch (Exception e) {
+                                                                                    e.printStackTrace();
+                                                                                }
+                                                                            }
+                                                                        });
+                                                                    } else {
+                                                                        showCustomToast("Timetable is closed");
+                                                                    }
+
+                                                                } else {
+                                                                    showCustomToast("No weeks found");
+                                                                }
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
                                                             }
-                                                        });
-                                                    }else {
-                                                        Toast.makeText(getContext(), "Timetable is closed", Toast.LENGTH_SHORT).show();
-                                                    }
+                                                        }
 
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError error) {
+                                                            try {
+                                                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                                            } catch (Exception e) {
+                                                                e.printStackTrace();
+                                                            }
+                                                        }
+                                                    });
                                                 } else {
-                                                    Toast.makeText(getContext(), "No weeks found", Toast.LENGTH_SHORT).show();
+                                                    showCustomToast("Shop ID not found for this user");
                                                 }
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
                                             }
+                                        }
 
-                                            @Override
-                                            public void onCancelled(@NonNull DatabaseError error) {
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+                                            try {
                                                 Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
                                             }
-                                        });
-                                    } else {
-                                        Toast.makeText(getContext(), "Shop ID not found for this user", Toast.LENGTH_SHORT).show();
-                                    }
+                                        }
+                                    });
+                                } else {
+                                    showCustomToast("User not logged");
                                 }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError error) {
-                                    Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                        } else {
-                            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                         }
-                    }
-                });
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
 
-        morningSstart.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dialog.show();
-
-                add_shift_btn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        FirebaseUser user = mAuth.getCurrentUser();
-                        if (user != null) {
-                            listener = firebaseDatabase.getReference().addValueEventListener(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    String userId = user.getUid();
-                                    String dataItem = ip_shift_et.getText().toString();
-                                    String ownerShopId = snapshot.child("User").child(userId).child("shopID").getValue(String.class);
-                                    firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("Calendar").child("week1").child("morningSstart").setValue(dataItem);
-                                    dialog.dismiss();
-                                    Toast.makeText(getContext(), "Added Successfully", Toast.LENGTH_SHORT).show();
-
-                                }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError error) {
-                                    Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                        }else {
-                            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
-                        }
-
-                    }
-                });
-            }
-        });
-
-        morningSend.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dialog.show();
-
-                add_shift_btn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        FirebaseUser user = mAuth.getCurrentUser();
-                        if (user != null) {
-                            listener = firebaseDatabase.getReference().addValueEventListener(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    String userId = user.getUid();
-                                    String dataItem = ip_shift_et.getText().toString();
-                                    String ownerShopId = snapshot.child("User").child(userId).child("shopID").getValue(String.class);
-                                    firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("Calendar").child("week1").child("morningSend").setValue(dataItem);
-                                    dialog.dismiss();
-                                    Toast.makeText(getContext(), "Added Successfully", Toast.LENGTH_SHORT).show();
-
-                                }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError error) {
-                                    Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                        }else {
-                            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
-                        }
-
-                    }
-                });
-            }
-        });
-
-        afternoonSstart.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dialog.show();
-
-                add_shift_btn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        FirebaseUser user = mAuth.getCurrentUser();
-                        if (user != null) {
-                            listener = firebaseDatabase.getReference().addValueEventListener(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    String userId = user.getUid();
-                                    String dataItem = ip_shift_et.getText().toString();
-                                    String ownerShopId = snapshot.child("User").child(userId).child("shopID").getValue(String.class);
-                                    firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("Calendar").child("week1").child("afternoonSstart").setValue(dataItem);
-                                    dialog.dismiss();
-                                    Toast.makeText(getContext(), "Added Successfully", Toast.LENGTH_SHORT).show();
-
-                                }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError error) {
-                                    Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                        }else {
-                            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
-                        }
-
-                    }
-                });
-            }
-        });
-
-        afternoonSend.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dialog.show();
-
-                add_shift_btn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        FirebaseUser user = mAuth.getCurrentUser();
-                        if (user != null) {
-                            listener = firebaseDatabase.getReference().addValueEventListener(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    String userId = user.getUid();
-                                    String dataItem = ip_shift_et.getText().toString();
-                                    String ownerShopId = snapshot.child("User").child(userId).child("shopID").getValue(String.class);
-                                    firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("Calendar").child("week1").child("afternoonSend").setValue(dataItem);
-                                    dialog.dismiss();
-                                    Toast.makeText(getContext(), "Added Successfully", Toast.LENGTH_SHORT).show();
-
-                                }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError error) {
-                                    Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                        }else {
-                            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
-                        }
-
-                    }
-                });
-            }
-        });
-
-        eveningSstart.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dialog.show();
-
-                add_shift_btn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        FirebaseUser user = mAuth.getCurrentUser();
-                        if (user != null) {
-                            listener = firebaseDatabase.getReference().addValueEventListener(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    String userId = user.getUid();
-                                    String dataItem = ip_shift_et.getText().toString();
-                                    String ownerShopId = snapshot.child("User").child(userId).child("shopID").getValue(String.class);
-                                    firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("Calendar").child("week1").child("eveningSstart").setValue(dataItem);
-                                    dialog.dismiss();
-                                    Toast.makeText(getContext(), "Added Successfully", Toast.LENGTH_SHORT).show();
-
-                                }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError error) {
-                                    Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                        }else {
-                            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
-                        }
-
-                    }
-                });
-            }
-        });
-
-        eveningSend.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dialog.show();
-
-                add_shift_btn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        FirebaseUser user = mAuth.getCurrentUser();
-                        if (user != null) {
-                            listener = firebaseDatabase.getReference().addValueEventListener(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    String userId = user.getUid();
-                                    String dataItem = ip_shift_et.getText().toString();
-                                    String ownerShopId = snapshot.child("User").child(userId).child("shopID").getValue(String.class);
-                                    firebaseDatabase.getReference().child("Shop").child(ownerShopId).child("Calendar").child("week1").child("eveningSend").setValue(dataItem);
-                                    dialog.dismiss();
-                                    Toast.makeText(getContext(), "Added Successfully", Toast.LENGTH_SHORT).show();
-
-                                }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError error) {
-                                    Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                        }else {
-                            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
-                        }
-
-                    }
-                });
-            }
-        });
     }
 
     private void showCustomToast(String message) {
