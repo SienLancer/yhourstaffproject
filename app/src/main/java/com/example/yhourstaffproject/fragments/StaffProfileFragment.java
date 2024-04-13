@@ -9,7 +9,9 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
@@ -17,15 +19,23 @@ import com.example.yhourstaffproject.R;
 import com.example.yhourstaffproject.activities.SignInForStaffActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 
 public class StaffProfileFragment extends Fragment {
 
     private View mView;
-    private ImageView avatar_img;
-    private TextView staff_name_tv, staff_email_tv;
+    ImageView avatar_img;
+    TextView staff_name_tv, staff_email_tv, staff_phone_tv, staff_address_tv,
+            staff_dob_tv, staff_hourly_salary_tv, staff_position_tv;
 
     Button logoutS_btn;
+    FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+    FirebaseAuth mAuth = FirebaseAuth.getInstance();
     public StaffProfileFragment() {
         // Required empty public constructor
     }
@@ -51,6 +61,11 @@ public class StaffProfileFragment extends Fragment {
         staff_name_tv = mView.findViewById(R.id.staff_name_tv);
         staff_email_tv = mView.findViewById(R.id.staff_email_tv);
         avatar_img = mView.findViewById(R.id.avatar_img);
+        staff_dob_tv = mView.findViewById(R.id.staff_dob_tv);
+        staff_hourly_salary_tv = mView.findViewById(R.id.staff_hourly_salary_tv);
+        staff_position_tv = mView.findViewById(R.id.staff_position_tv);
+        staff_address_tv = mView.findViewById(R.id.staff_address_tv);
+        staff_phone_tv = mView.findViewById(R.id.staff_phone_tv);
 
 
         logoutS_btn.setOnClickListener(new View.OnClickListener() {
@@ -62,10 +77,57 @@ public class StaffProfileFragment extends Fragment {
                 getActivity().finish();
             }
         });
-        showUserInfo();
+        getUsername();
         return mView;
     }
 
+
+    public void getUsername() {
+        try {
+            FirebaseUser user = mAuth.getCurrentUser();
+            String userId = user.getUid();
+            if (user != null) {
+                DatabaseReference userReference = firebaseDatabase.getReference("User").child(userId);
+
+                userReference.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        try {
+                            if (snapshot.exists()) {
+                                String name = snapshot.child("name").getValue(String.class);
+                                staff_name_tv.setText(name);
+                                String email = snapshot.child("email").getValue(String.class);
+                                staff_email_tv.setText(email);
+                                String dob = snapshot.child("dateOfBirth").getValue(String.class);
+                                staff_dob_tv.setText(dob);
+                                Integer hourlySalary = snapshot.child("hourlySalary").getValue(Integer.class);
+                                staff_hourly_salary_tv.setText(hourlySalary+" VND");
+                                String position = snapshot.child("position").getValue(String.class);
+                                staff_position_tv.setText(position);
+                                String address = snapshot.child("address").getValue(String.class);
+                                staff_address_tv.setText(address);
+                                Integer phone = snapshot.child("phoneNumber").getValue(Integer.class);
+                                staff_phone_tv.setText(phone+"");
+                            } else {
+                                Toast.makeText(getContext(), "Data doesn't exist", Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } else {
+                Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     private void showUserInfo(){
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null){
