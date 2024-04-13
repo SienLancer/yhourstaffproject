@@ -53,63 +53,61 @@ public class WeekListActivity extends AppCompatActivity {
             firebaseDatabase.getReference().addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    String ownerShopId = snapshot.child("User").child(userId).child("shopID").getValue(String.class);
-                    Log.d(TAG, "Owner Shop ID: " + ownerShopId);
-                    if (ownerShopId != null) {
-                        firebaseDatabase.getReference("Shop").addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                boolean shopFound = false;
-                                for (DataSnapshot shopSnapshot : snapshot.getChildren()) {
-                                    String shopKey = shopSnapshot.getKey();
-                                    Log.d(TAG, "Shop Key: " + shopKey);
-                                    if (ownerShopId.equals(shopKey)) {
-                                        shopFound = true;
-                                        //Toast.makeText(NewCalendarActivity.this, "Shop found", Toast.LENGTH_SHORT).show();
-                                        // Thực hiện các hành động cần thiết khi tìm thấy cửa hàng
+                    try {
+                        String ownerShopId = snapshot.child("User").child(userId).child("shopID").getValue(String.class);
+                        Log.d(TAG, "Owner Shop ID: " + ownerShopId);
+                        if (ownerShopId != null) {
+                            firebaseDatabase.getReference("Shop").addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                    boolean shopFound = false;
+                                    for (DataSnapshot shopSnapshot : snapshot.getChildren()) {
+                                        String shopKey = shopSnapshot.getKey();
+                                        Log.d(TAG, "Shop Key: " + shopKey);
+                                        if (ownerShopId.equals(shopKey)) {
+                                            shopFound = true;
+                                            //Toast.makeText(NewCalendarActivity.this, "Shop found", Toast.LENGTH_SHORT).show();
+                                            // Thực hiện các hành động cần thiết khi tìm thấy cửa hàng
 
-                                        for (DataSnapshot calendarSnapshot : shopSnapshot.child("Calendar").getChildren()) {
-                                            String weekId = calendarSnapshot.getKey();
-                                            String startDay = calendarSnapshot.child("startDay").getValue(String.class);
-                                            String endDay = calendarSnapshot.child("endDay").getValue(String.class);
-                                            Log.d(TAG, "Week Key: " + weekId);
-                                            Log.d(TAG, "Start Day: " + startDay);
-                                            Log.d(TAG, "End Day: " + endDay);
-                                            Week week = new Week(weekId, startDay, endDay);
-                                            weekList.add(week);
-                                            adapter.notifyDataSetChanged();
+                                            for (DataSnapshot calendarSnapshot : shopSnapshot.child("Calendar").getChildren()) {
+                                                String weekId = calendarSnapshot.getKey();
+                                                String startDay = calendarSnapshot.child("startDay").getValue(String.class);
+                                                String endDay = calendarSnapshot.child("endDay").getValue(String.class);
+                                                Log.d(TAG, "Week Key: " + weekId);
+                                                Log.d(TAG, "Start Day: " + startDay);
+                                                Log.d(TAG, "End Day: " + endDay);
+                                                Week week = new Week(weekId, startDay, endDay);
+                                                weekList.add(week);
+                                                adapter.notifyDataSetChanged();
 
+                                            }
+
+                                            break; // Kết thúc vòng lặp khi đã tìm thấy cửa hàng
                                         }
-
-
-
-
-
-                                        break; // Kết thúc vòng lặp khi đã tìm thấy cửa hàng
-                                    }else {
+                                    }
+                                    if (!shopFound) {
                                         Toast.makeText(WeekListActivity.this, "List not found", Toast.LENGTH_SHORT).show();
                                     }
-                                }
-                                if (!shopFound) {
-                                    Toast.makeText(WeekListActivity.this, "Shop not found", Toast.LENGTH_SHORT).show();
+
                                 }
 
-                            }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
-                                Toast.makeText(WeekListActivity.this, "Error", Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                    }else {
-                        Toast.makeText(WeekListActivity.this, "Shop not found", Toast.LENGTH_SHORT).show();
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+                                    Toast.makeText(WeekListActivity.this, "Error", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        } else {
+                            Toast.makeText(WeekListActivity.this, "Shop not found", Toast.LENGTH_SHORT).show();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Toast.makeText(WeekListActivity.this, "Error occurred", Toast.LENGTH_SHORT).show();
                     }
-
                 }
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
-
+                    Toast.makeText(WeekListActivity.this, "Database error", Toast.LENGTH_SHORT).show();
                 }
             });
 

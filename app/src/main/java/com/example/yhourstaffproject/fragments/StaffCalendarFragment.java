@@ -45,7 +45,7 @@ import com.google.firebase.database.ValueEventListener;
 public class StaffCalendarFragment extends Fragment {
     private View mView;
     ViewFlipper viewFlipper;
-    TextView start_end_date_tv, status_closed_tv;
+    TextView start_end_date_tv, status_closed_tv, title_timetable_tv;
     Button view_timetable_btn, list_timetable_btn, network_dialog_btn;
     EditText ip_shift_et;
     Button add_shift_btn,cancel_btn;
@@ -208,6 +208,10 @@ public class StaffCalendarFragment extends Fragment {
                                         status_closed_tv.setText(status);
                                         status_closed_tv.setTextColor(colorClosed);
                                     }
+                                    String nameWeek = lastWeekSnapshot.child("id").getValue(String.class);
+                                    String[] parts = nameWeek.split(":");
+                                    String namePart = parts[1];
+                                    title_timetable_tv.setText(namePart);
                                     start_end_date_tv.setText(lastWeekSnapshot.child("startDay").getValue(String.class) + " - " + lastWeekSnapshot.child("endDay").getValue(String.class));
 
                                     Mon1.setText(lastWeekSnapshot.child("mon1").getValue(String.class));
@@ -306,6 +310,7 @@ public class StaffCalendarFragment extends Fragment {
     public void init(){
         view_timetable_btn = mView.findViewById(R.id.view_timetable_btn);
         list_timetable_btn = mView.findViewById(R.id.list_timetable_btn);
+        title_timetable_tv = mView.findViewById(R.id.title_timetable_tv);
         viewFlipper = mView.findViewById(R.id.view_flipper);
         start_end_date_tv = mView.findViewById(R.id.start_end_date_tv);
         status_closed_tv = mView.findViewById(R.id.status_closed_tv);
