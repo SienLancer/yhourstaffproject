@@ -11,38 +11,46 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/title_name_home_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:text="Hello Minh Tri"
+            android:layout_marginTop="20dp"
+            android:textColor="#979797"
+            android:textSize="26sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/slogan_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/roboto_light_italic"
+            android:text="Let’s start a wonderful new day!"
+            android:textColor="@color/black"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:background="@drawable/bg_title_home"
         android:layout_marginBottom="30dp"
         android:orientation="horizontal">
 
         <!-- Các TextView dọc bên trái -->
+
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
             android:orientation="vertical"
             android:gravity="start">
-
-            <TextView
-                android:id="@+id/title_name_home_tv"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:text="Hello Minh Tri"
-                android:textColor="#979797"
-                android:textSize="32sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/slogan_tv"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:fontFamily="@font/roboto_light_italic"
-                android:layout_marginTop="16dp"
-                android:text="Let’s start a wonderful new day!"
-                android:textColor="@color/black"
-                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/textView888"
@@ -74,42 +82,47 @@
             android:layout_weight="1"
             android:layout_height="match_parent">
 
+            <!-- ImageButton -->
+
             <ImageButton
                 android:id="@+id/on_shift_imgBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@color/white"
-                app:srcCompat="@drawable/on_shift_btn_bg"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.767"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.231"
+                app:srcCompat="@drawable/on_shift_btn_bg" />
 
-            <!-- ImageButton -->
             <ImageButton
                 android:id="@+id/scanQr_imgBtn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@color/white"
-                app:srcCompat="@drawable/scan_check_in_btn"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.76"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.231"
+                app:srcCompat="@drawable/scan_check_in_btn" />
 
             <TextView
                 android:id="@+id/scan_txt"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
                 android:fontFamily="@font/roboto_light_italic"
-                android:layout_marginBottom="56dp"
                 android:text="Scan QR"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.522"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintHorizontal_bias="0.763"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/scanQr_imgBtn"
+                app:layout_constraintVertical_bias="0.233" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>
@@ -124,7 +137,7 @@
         android:layout_height="match_parent"
         android:background="@drawable/bg_list_timekeeping_home"
         android:paddingTop="20dp"
-        android:paddingLeft="30dp"
+        android:paddingLeft="20dp"
         android:orientation="vertical">
 
 

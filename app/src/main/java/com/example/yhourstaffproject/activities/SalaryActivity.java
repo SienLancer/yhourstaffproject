@@ -110,7 +110,7 @@ public class SalaryActivity extends AppCompatActivity {
                     String ownerShopId = snapshot.child("User").child(userId).child("shopID").getValue(String.class);
                     Log.d(TAG, "Owner Shop ID: " + ownerShopId);
                     if (ownerShopId != null) {
-                        firebaseDatabase.getReference("User").addValueEventListener(new ValueEventListener() {
+                        firebaseDatabase.getReference("User").addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot snapshot) {
                                 for (DataSnapshot userSnapshot : snapshot.getChildren()) {
