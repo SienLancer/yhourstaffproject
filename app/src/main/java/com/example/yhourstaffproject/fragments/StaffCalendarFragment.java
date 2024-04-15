@@ -4,12 +4,10 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -19,6 +17,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
@@ -28,7 +27,6 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.yhourstaffproject.R;
-import com.example.yhourstaffproject.activities.CalendarActivity;
 import com.example.yhourstaffproject.activities.WeekListActivity;
 import com.example.yhourstaffproject.utility.NetworkUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -46,7 +44,7 @@ public class StaffCalendarFragment extends Fragment {
     private View mView;
     ViewFlipper viewFlipper;
     TextView start_end_date_tv, status_closed_tv, title_timetable_tv;
-    Button view_timetable_btn, list_timetable_btn, network_dialog_btn;
+    Button network_dialog_btn;
     EditText ip_shift_et;
     Button add_shift_btn,cancel_btn;
     Dialog dialog, networkDialog;
@@ -54,7 +52,7 @@ public class StaffCalendarFragment extends Fragment {
     AlertDialog loadDialog;
     Animation animation;
     private Handler handler = new Handler();
-    private Runnable runnable;
+    LinearLayout list_week_layout;
     FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
     ValueEventListener listener;
@@ -148,19 +146,12 @@ public class StaffCalendarFragment extends Fragment {
             }
         });
 
-        list_timetable_btn.setOnClickListener(new View.OnClickListener() {
+        list_week_layout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), WeekListActivity.class);
                 startActivity(intent);
-            }
-        });
 
-        view_timetable_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), CalendarActivity.class);
-                startActivity(intent);
             }
         });
 
@@ -308,9 +299,8 @@ public class StaffCalendarFragment extends Fragment {
     }
 
     public void init(){
-        view_timetable_btn = mView.findViewById(R.id.view_timetable_btn);
-        list_timetable_btn = mView.findViewById(R.id.list_timetable_btn);
         title_timetable_tv = mView.findViewById(R.id.title_timetable_tv);
+        list_week_layout = mView.findViewById(R.id.list_week_layout);
         viewFlipper = mView.findViewById(R.id.view_flipper);
         start_end_date_tv = mView.findViewById(R.id.start_end_date_tv);
         status_closed_tv = mView.findViewById(R.id.status_closed_tv);
