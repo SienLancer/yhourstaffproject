@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -36,9 +37,11 @@ public class WeekAdapter extends RecyclerView.Adapter<WeekAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Week week = weeks.get(position);
-        holder.weekNameTextView.setText(week.getId());
-        holder.startDayTextView.setText("Start Day: " + week.getStartDay());
-        holder.endDayTextView.setText("End Day: " + week.getEndDay());
+        String[] parts = week.getId().split(":");
+        String namePart = parts[1];
+        holder.weekNameTextView.setText(namePart);
+        holder.startDayTextView.setText(week.getStartDay());
+        holder.endDayTextView.setText(" - " + week.getEndDay());
         holder.detailWeekButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -58,7 +61,7 @@ public class WeekAdapter extends RecyclerView.Adapter<WeekAdapter.ViewHolder> {
         TextView weekNameTextView;
         TextView startDayTextView;
         TextView endDayTextView;
-        Button detailWeekButton;
+        ImageButton detailWeekButton;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
