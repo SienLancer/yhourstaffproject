@@ -80,6 +80,13 @@
         android:layout_marginTop="20dp"
         android:background="@drawable/bg_signin_btn"
         android:text="Change Password" />
+    <Button
+        android:id="@+id/profile_edit_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/bg_signin_btn"
+        android:text="Edit Profile" />
 
     <Button
         android:id="@+id/logoutS_btn"

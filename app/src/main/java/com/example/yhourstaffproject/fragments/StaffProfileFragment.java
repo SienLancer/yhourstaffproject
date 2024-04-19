@@ -18,6 +18,7 @@ import com.bumptech.glide.Glide;
 import com.example.yhourstaffproject.R;
 import com.example.yhourstaffproject.activities.ChangePasswordActivity;
 import com.example.yhourstaffproject.activities.SignInForStaffActivity;
+import com.example.yhourstaffproject.activities.UpdateProfileActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -34,7 +35,7 @@ public class StaffProfileFragment extends Fragment {
     TextView staff_name_tv, staff_email_tv, staff_phone_tv, staff_address_tv,
             staff_dob_tv, staff_hourly_salary_tv, staff_position_tv;
 
-    Button logoutS_btn, profile_change_password_btn;
+    Button logoutS_btn, profile_change_password_btn, edit_profile_btn;
     FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
     public StaffProfileFragment() {
@@ -68,11 +69,20 @@ public class StaffProfileFragment extends Fragment {
         staff_address_tv = mView.findViewById(R.id.staff_address_tv);
         staff_phone_tv = mView.findViewById(R.id.staff_phone_tv);
         profile_change_password_btn = mView.findViewById(R.id.profile_change_password_btn);
+        edit_profile_btn = mView.findViewById(R.id.profile_edit_btn);
 
         profile_change_password_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), ChangePasswordActivity.class);
+                startActivity(intent);
+            }
+        });
+
+        edit_profile_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), UpdateProfileActivity.class);
                 startActivity(intent);
             }
         });
@@ -116,7 +126,7 @@ public class StaffProfileFragment extends Fragment {
                                 String address = snapshot.child("address").getValue(String.class);
                                 staff_address_tv.setText(address);
                                 Integer phone = snapshot.child("phoneNumber").getValue(Integer.class);
-                                staff_phone_tv.setText(phone+"");
+                                staff_phone_tv.setText("+84 "+phone);
                             } else {
                                 Toast.makeText(getContext(), "Data doesn't exist", Toast.LENGTH_SHORT).show();
                             }
@@ -160,4 +170,6 @@ public class StaffProfileFragment extends Fragment {
         Glide.with(getContext()).load(photoUrl).error(R.drawable.ava_de).into(avatar_img);
 
     }
+
+
 }
