@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.example.yhourstaffproject.R;
+import com.example.yhourstaffproject.activities.ChangePasswordActivity;
 import com.example.yhourstaffproject.activities.SignInForStaffActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -33,7 +34,7 @@ public class StaffProfileFragment extends Fragment {
     TextView staff_name_tv, staff_email_tv, staff_phone_tv, staff_address_tv,
             staff_dob_tv, staff_hourly_salary_tv, staff_position_tv;
 
-    Button logoutS_btn;
+    Button logoutS_btn, profile_change_password_btn;
     FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
     public StaffProfileFragment() {
@@ -66,7 +67,15 @@ public class StaffProfileFragment extends Fragment {
         staff_position_tv = mView.findViewById(R.id.staff_position_tv);
         staff_address_tv = mView.findViewById(R.id.staff_address_tv);
         staff_phone_tv = mView.findViewById(R.id.staff_phone_tv);
+        profile_change_password_btn = mView.findViewById(R.id.profile_change_password_btn);
 
+        profile_change_password_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), ChangePasswordActivity.class);
+                startActivity(intent);
+            }
+        });
 
         logoutS_btn.setOnClickListener(new View.OnClickListener() {
             @Override

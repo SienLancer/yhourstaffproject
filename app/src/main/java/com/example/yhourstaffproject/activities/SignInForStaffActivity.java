@@ -29,6 +29,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class SignInForStaffActivity extends AppCompatActivity {
     ImageButton backSignInS_imgBtn;
     EditText usernameSLogin_edt, pwSLogin_edt;
@@ -101,51 +104,89 @@ public class SignInForStaffActivity extends AppCompatActivity {
         String username, password;
         username = usernameSLogin_edt.getText().toString();
         password = pwSLogin_edt.getText().toString();
-        if (TextUtils.isEmpty(username)){
-            Toast.makeText(this, "Vui lòng nhập lại cái username giùm!", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        else if (TextUtils.isEmpty(password)){
-            Toast.makeText(this, "Vui lòng nhập lại cái pass giùm!", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        dialog.show();
-        mAuth.signInWithEmailAndPassword(username, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                if (task.isSuccessful()){
 
-                    String id = task.getResult().getUser().getUid();
-                    firebaseDatabase.getReference().child("User").child(id).child("role")
-                            .addListenerForSingleValueEvent(new ValueEventListener() {
+        try {
+            if (TextUtils.isEmpty(username)) {
+                throw new IllegalArgumentException("Please enter your email!");
+            }
+
+            if (TextUtils.isEmpty(password)) {
+                throw new IllegalArgumentException("Please enter your password!");
+            }
+
+            if (!isValidEmail(username)) {
+                throw new IllegalArgumentException("Invalid email format!");
+            }
+
+            if (!isValidPassword(password)) {
+                throw new IllegalArgumentException("Password must be at least 6 characters long!");
+            }
+
+            dialog.show();
+            mAuth.signInWithEmailAndPassword(username, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                @Override
+                public void onComplete(@NonNull Task<AuthResult> task) {
+                    try {
+                        if (task.isSuccessful()) {
+                            String id = task.getResult().getUser().getUid();
+                            firebaseDatabase.getReference().child("User").child(id).addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    int role = snapshot.getValue(Integer.class);
-                                    if (role == 1){
-
-                                        Intent i = new Intent(SignInForStaffActivity.this, BottomTabActivity.class);
-                                        startActivity(i);
+                                    if (snapshot.exists()) {
+                                        int role = snapshot.child("role").getValue(Integer.class);
+                                        int availabilityStatus = snapshot.child("availabilityStatus").getValue(Integer.class);
+                                        if (role == 1) {
+                                            if (availabilityStatus == 1) {
+                                                Intent i = new Intent(SignInForStaffActivity.this, BottomTabActivity.class);
+                                                startActivity(i);
+                                                dialog.dismiss();
+                                                Toast.makeText(getApplicationContext(), "Login successful!", Toast.LENGTH_SHORT).show();
+                                            } else {
+                                                Toast.makeText(getApplicationContext(), "Your account is inactive at the shop", Toast.LENGTH_SHORT).show();
+                                                dialog.dismiss();
+                                            }
+                                        } else {
+                                            Toast.makeText(getApplicationContext(), "Account not found", Toast.LENGTH_SHORT).show();
+                                            dialog.dismiss();
+                                        }
+                                    } else {
+                                        Toast.makeText(getApplicationContext(), "Account not found", Toast.LENGTH_SHORT).show();
                                         dialog.dismiss();
-                                        Toast.makeText(getApplicationContext(), "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
-                                    }else {
-                                        Toast.makeText(getApplicationContext(), "Email or password incorrect!", Toast.LENGTH_SHORT).show();
                                     }
                                 }
 
                                 @Override
                                 public void onCancelled(@NonNull DatabaseError error) {
-
+                                    Toast.makeText(getApplicationContext(), "Login failed!", Toast.LENGTH_SHORT).show();
+                                    dialog.dismiss();
                                 }
                             });
-
-                }else {
-                    dialog.dismiss();
-                    Toast.makeText(getApplicationContext(), "Đăng nhập không thành công!", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getApplicationContext(), "Login failed!", Toast.LENGTH_SHORT).show();
+                            dialog.dismiss();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Toast.makeText(getApplicationContext(), "Login failed!", Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
+                    }
                 }
-            }
-        });
+            });
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
+    private boolean isValidEmail(String email) {
+        String emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+";
+        Pattern pattern = Pattern.compile(emailPattern);
+        Matcher matcher = pattern.matcher(email);
+        return matcher.matches();
+    }
 
+    private boolean isValidPassword(String password) {
+        return password.length() >= 6;
+    }
 
 }
