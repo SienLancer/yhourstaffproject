@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -33,9 +34,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SignInForStaffActivity extends AppCompatActivity {
-    ImageButton backSignInS_imgBtn;
     EditText usernameSLogin_edt, pwSLogin_edt;
     Button loginS_btn;
+    TextView forgot_password_txt;
     private FirebaseAuth mAuth;
     ImageView loading_imgv;
     AlertDialog dialog;
@@ -46,33 +47,24 @@ public class SignInForStaffActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in_for_staff);
 
-        backSignInS_imgBtn = findViewById(R.id.backSignInS_imgBtn);
 
-        backSignInS_imgBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finish();
-            }
-        });
 
         mAuth = FirebaseAuth.getInstance();
 
-        backSignInS_imgBtn = findViewById(R.id.backSignInS_imgBtn);
         loginS_btn = findViewById(R.id.loginS_btn);
         pwSLogin_edt = findViewById(R.id.pwSLogin_edt);
         usernameSLogin_edt = findViewById(R.id.usernameSLogin_edt);
-//        progressDialog = new ProgressDialog(this);
-//        progressDialog.setTitle("Loading");
-//        progressDialog.setMessage("please wait...");
-//        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        forgot_password_txt = findViewById(R.id.forgot_password_txt);
 
         loadDialog();
 
-
-
-
-
-
+        forgot_password_txt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(SignInForStaffActivity.this, ForgotPasswordActivity.class);
+                startActivity(i);
+            }
+        });
 
 
         loginS_btn.setOnClickListener(new View.OnClickListener() {

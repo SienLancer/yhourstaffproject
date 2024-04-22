@@ -25,6 +25,9 @@
             android:name=".activities.ChangePasswordActivity"
             android:exported="false" />
         <activity
+            android:name=".activities.ForgotPasswordActivity"
+            android:exported="false" />
+        <activity
             android:name=".activities.SalaryActivity"
             android:exported="false" />
         <activity

@@ -8,15 +8,7 @@
     android:orientation="vertical"
     tools:context=".activities.SignInForStaffActivity">
 
-    <ImageButton
-        android:id="@+id/backSignInS_imgBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="20dp"
-        android:layout_marginTop="30dp"
-        android:background="@color/background"
-        android:tint="#FFFFFF"
-        app:srcCompat="@drawable/back_ic" />
+
 
     <TextView
         android:id="@+id/titleSignInS_txt"
@@ -31,7 +23,7 @@
     <EditText
         android:id="@+id/usernameSLogin_edt"
         android:layout_width="match_parent"
-        android:layout_height="52dp"
+        android:layout_height="43dp"
         android:layout_marginHorizontal="20dp"
         android:layout_marginTop="30dp"
         android:background="@drawable/bg_signin_edt"
@@ -39,14 +31,14 @@
         android:hint="Username"
         android:inputType="text"
         android:paddingLeft="15dp"
-        android:textColor="@color/white"
-        android:textColorHint="@color/white"
+        android:textColor="@color/black"
+        android:textColorHint="@color/black"
         android:textSize="16sp" />
 
     <EditText
         android:id="@+id/pwSLogin_edt"
         android:layout_width="match_parent"
-        android:layout_height="52dp"
+        android:layout_height="43dp"
         android:layout_marginHorizontal="20dp"
         android:layout_marginTop="20dp"
         android:background="@drawable/bg_signin_edt"
@@ -54,12 +46,12 @@
         android:hint="Password"
         android:inputType="textPassword"
         android:paddingLeft="15dp"
-        android:textColor="@color/white"
-        android:textColorHint="@color/white"
+        android:textColor="@color/black"
+        android:textColorHint="@color/black"
         android:textSize="16sp" />
 
     <TextView
-        android:id="@+id/forgotPwS_txt"
+        android:id="@+id/forgot_password_txt"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -80,46 +72,7 @@
         android:textColor="#FFFFFF"
         android:textSize="16sp" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/lineLeftS"
-            android:layout_width="wrap_content"
-            android:layout_height="2dp"
-            android:background="@color/white"
-            android:layout_marginTop="10dp"
-            android:layout_weight="1" />
 
-        <TextView
-            android:id="@+id/continueS_txt"
-            android:layout_width="10dp"
-            android:layout_height="wrap_content"
-            android:textSize="12sp"
-            android:textColor="@color/white"
-            android:layout_weight="1"
-            android:textAlignment="center"
-            android:text="Continue" />
-
-        <TextView
-            android:id="@+id/lineRightS"
-            android:layout_width="wrap_content"
-            android:layout_height="2dp"
-            android:background="@color/white"
-            android:layout_marginTop="10dp"
-            android:layout_weight="1" />
-    </LinearLayout>
-
-    <ImageButton
-        android:id="@+id/ggS_btn"
-        android:layout_width="wrap_content"
-        android:layout_gravity="center"
-        android:layout_height="wrap_content"
-        android:background="@color/background"
-        android:layout_marginTop="20dp"
-        app:srcCompat="@drawable/googleicon" />
 
 </LinearLayout>

@@ -147,29 +147,7 @@ public class StaffProfileFragment extends Fragment {
             e.printStackTrace();
         }
     }
-    private void showUserInfo(){
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user == null){
-            return;
-        }
-        String name = user.getDisplayName();
-        String email = user.getEmail();
-        Uri photoUrl = user.getPhotoUrl();
 
-        if (name == null ){
-
-            staff_name_tv.setText("Anonymous");
-        }else {
-            staff_name_tv.setVisibility(View.VISIBLE);
-            staff_name_tv.setText(name);
-
-        }
-
-        staff_email_tv.setText(email);
-        //avatar_img.setImageURI(photoUrl);
-        Glide.with(getContext()).load(photoUrl).error(R.drawable.ava_de).into(avatar_img);
-
-    }
 
 
 }
