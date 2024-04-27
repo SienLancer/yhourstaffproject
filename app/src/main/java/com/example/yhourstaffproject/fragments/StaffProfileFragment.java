@@ -1,12 +1,14 @@
 package com.example.yhourstaffproject.fragments;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,11 +33,13 @@ import com.google.firebase.database.ValueEventListener;
 public class StaffProfileFragment extends Fragment {
 
     private View mView;
-    ImageView avatar_img;
-    TextView staff_name_tv, staff_email_tv, staff_phone_tv, staff_address_tv,
-            staff_dob_tv, staff_hourly_salary_tv, staff_position_tv;
 
-    Button logoutS_btn, profile_change_password_btn, edit_profile_btn;
+    TextView staff_name_tv, staff_email_tv, staff_phone_tv, staff_address_tv,
+            staff_dob_tv, staff_hourly_salary_tv, staff_position_tv,
+            owner_shop_phone_tv, owner_shop_email_tv, owner_shop_name_tv, owner_shop_address_tv;
+
+    Button profile_change_password_btn, edit_profile_btn;
+    ImageButton logoutS_btn;
     FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
     public StaffProfileFragment() {
@@ -62,7 +66,6 @@ public class StaffProfileFragment extends Fragment {
         logoutS_btn = mView.findViewById(R.id.logoutS_btn);
         staff_name_tv = mView.findViewById(R.id.staff_name_tv);
         staff_email_tv = mView.findViewById(R.id.staff_email_tv);
-        avatar_img = mView.findViewById(R.id.avatar_img);
         staff_dob_tv = mView.findViewById(R.id.staff_dob_tv);
         staff_hourly_salary_tv = mView.findViewById(R.id.staff_hourly_salary_tv);
         staff_position_tv = mView.findViewById(R.id.staff_position_tv);
@@ -70,6 +73,14 @@ public class StaffProfileFragment extends Fragment {
         staff_phone_tv = mView.findViewById(R.id.staff_phone_tv);
         profile_change_password_btn = mView.findViewById(R.id.profile_change_password_btn);
         edit_profile_btn = mView.findViewById(R.id.profile_edit_btn);
+        owner_shop_name_tv = mView.findViewById(R.id.owner_shop_name_tv);
+        owner_shop_address_tv = mView.findViewById(R.id.owner_shop_address_tv);
+        owner_shop_phone_tv = mView.findViewById(R.id.owner_shop_phone_tv);
+        owner_shop_email_tv = mView.findViewById(R.id.owner_shop_email_tv);
+
+        edit_profile_btn.setBackgroundColor(Color.TRANSPARENT);
+        edit_profile_btn.setTextSize(14);
+        profile_change_password_btn.setBackgroundColor(Color.TRANSPARENT);
 
         profile_change_password_btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -97,6 +108,7 @@ public class StaffProfileFragment extends Fragment {
             }
         });
         getUsername();
+        getShopInfo();
         return mView;
     }
 
@@ -145,6 +157,55 @@ public class StaffProfileFragment extends Fragment {
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    public void getShopInfo() {
+        try {
+            //loadDialog.show();
+            FirebaseUser user = mAuth.getCurrentUser();
+            String userId = user.getUid();
+            if (user != null) {
+                firebaseDatabase.getReference().addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        String ownerShopId = snapshot.child("User").child(userId).child("shopID").getValue(String.class);
+                        if (ownerShopId != null) {
+                            firebaseDatabase.getReference().child("Shop").child(ownerShopId)
+                                    .addValueEventListener(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                            String shopName = snapshot.child("name").getValue(String.class);
+                                            String shopEmail = snapshot.child("email").getValue(String.class);
+                                            String shopAddress = snapshot.child("address").getValue(String.class);
+                                            Integer shopPhone = snapshot.child("phoneNumber").getValue(Integer.class); // Retrieve as Integer
+
+                                            owner_shop_name_tv.setText(shopName);
+                                            owner_shop_address_tv.setText(shopAddress);
+                                            owner_shop_email_tv.setText(shopEmail);
+                                            owner_shop_phone_tv.setText("+84 "+shopPhone); // Convert Integer to String before setting
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+                                        }
+                                    });
+                        } else {
+                            Toast.makeText(getContext(), "Shop not found", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } else {
+                Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(getContext(), "An error occurred", Toast.LENGTH_SHORT).show();
         }
     }
 
