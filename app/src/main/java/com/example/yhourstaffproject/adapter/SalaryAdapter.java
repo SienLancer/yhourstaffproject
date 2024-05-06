@@ -3,6 +3,7 @@ package com.example.yhourstaffproject.adapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -39,7 +40,17 @@ public class SalaryAdapter extends RecyclerView.Adapter<SalaryAdapter.ViewHolder
         DecimalFormat formatter = new DecimalFormat("#,###");
         String formattedSalary = formatter.format(salary.getCurrentSalary());
         holder.current_salary_tv.setText(formattedSalary);
-        holder.payday_tv.setText("Payday: " + salary.getPayDay());
+        String payDay = salary.getPayDay();
+        if (payDay.equals("")) {
+            // Nếu ngày thanh toán là null, thiết lập hình ảnh tương ứng
+            holder.received_salary_iv.setImageResource(R.drawable.received_yet_ic); // Thay thế R.drawable.null_payday_image với ID hình ảnh thích hợp
+            holder.payday_tv.setText("Payday: " + payDay);
+        } else {
+            holder.received_salary_iv.setImageResource(R.drawable.check_salary_ic);
+            holder.payday_tv.setText("Payday: " + payDay);
+            // Nếu ngày thanh toán không null, không cần thiết lập hình ảnh
+        }
+
 
 
 
@@ -52,6 +63,7 @@ public class SalaryAdapter extends RecyclerView.Adapter<SalaryAdapter.ViewHolder
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView start_date_after_payday_tv, current_salary_tv, payday_tv;
+        ImageView received_salary_iv;
 
 
         public ViewHolder(@NonNull View itemView) {
@@ -59,7 +71,7 @@ public class SalaryAdapter extends RecyclerView.Adapter<SalaryAdapter.ViewHolder
             start_date_after_payday_tv = itemView.findViewById(R.id.start_date_after_payday_tv);
             current_salary_tv = itemView.findViewById(R.id.current_salary_tv);
             payday_tv = itemView.findViewById(R.id.payday_tv);
-
+            received_salary_iv = itemView.findViewById(R.id.received_salary_iv);
         }
     }
 }

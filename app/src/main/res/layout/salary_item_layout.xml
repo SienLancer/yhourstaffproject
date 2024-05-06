@@ -18,7 +18,7 @@
         android:textSize="14sp"
         android:fontFamily="@font/roboto"
         android:textColor="@color/white"
-        app:layout_constraintStart_toEndOf="@+id/imageView"
+        app:layout_constraintStart_toEndOf="@+id/received_salary_iv"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
@@ -47,12 +47,12 @@
         android:fontFamily="@font/roboto"
         android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/imageView"
+        app:layout_constraintStart_toEndOf="@+id/received_salary_iv"
         app:layout_constraintTop_toBottomOf="@+id/start_date_after_payday_tv"
         app:layout_constraintVertical_bias="0.0" />
 
     <ImageView
-        android:id="@+id/imageView"
+        android:id="@+id/received_salary_iv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="15dp"

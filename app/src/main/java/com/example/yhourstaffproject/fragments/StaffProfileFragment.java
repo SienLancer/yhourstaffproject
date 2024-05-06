@@ -1,7 +1,9 @@
 package com.example.yhourstaffproject.fragments;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -19,6 +21,7 @@ import androidx.fragment.app.Fragment;
 import com.bumptech.glide.Glide;
 import com.example.yhourstaffproject.R;
 import com.example.yhourstaffproject.activities.ChangePasswordActivity;
+import com.example.yhourstaffproject.activities.SalaryActivity;
 import com.example.yhourstaffproject.activities.SignInForStaffActivity;
 import com.example.yhourstaffproject.activities.UpdateProfileActivity;
 import com.google.firebase.auth.FirebaseAuth;
@@ -33,12 +36,13 @@ import com.google.firebase.database.ValueEventListener;
 public class StaffProfileFragment extends Fragment {
 
     private View mView;
-
+    Dialog dialog;
     TextView staff_name_tv, staff_email_tv, staff_phone_tv, staff_address_tv,
             staff_dob_tv, staff_hourly_salary_tv, staff_position_tv,
-            owner_shop_phone_tv, owner_shop_email_tv, owner_shop_name_tv, owner_shop_address_tv;
+            owner_shop_phone_tv, owner_shop_email_tv, owner_shop_name_tv, owner_shop_address_tv,
+            dialog_title, dialog_message;
 
-    Button profile_change_password_btn, edit_profile_btn;
+    Button profile_change_password_btn, edit_profile_btn, button_yes, button_no;
     ImageButton logoutS_btn;
     FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     FirebaseAuth mAuth = FirebaseAuth.getInstance();
@@ -78,6 +82,16 @@ public class StaffProfileFragment extends Fragment {
         owner_shop_phone_tv = mView.findViewById(R.id.owner_shop_phone_tv);
         owner_shop_email_tv = mView.findViewById(R.id.owner_shop_email_tv);
 
+        dialog=new Dialog(getContext());
+        dialog.setContentView(R.layout.custom_yes_no_dialog);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog_title = dialog.findViewById(R.id.dialog_title);
+        dialog_message = dialog.findViewById(R.id.dialog_message);
+
+        dialog_title.setText("Log out");
+        dialog_message.setText("Do you want to log out?");
+        button_yes =dialog.findViewById(R.id.button_yes);
+        button_no =dialog.findViewById(R.id.button_no);
         edit_profile_btn.setBackgroundColor(Color.TRANSPARENT);
         edit_profile_btn.setTextSize(14);
         profile_change_password_btn.setBackgroundColor(Color.TRANSPARENT);
@@ -98,13 +112,21 @@ public class StaffProfileFragment extends Fragment {
             }
         });
 
-        logoutS_btn.setOnClickListener(new View.OnClickListener() {
+        button_yes.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(View v) {
                 FirebaseAuth.getInstance().signOut();
+                dialog.dismiss();
                 Intent intent = new Intent(getActivity(), SignInForStaffActivity.class);
                 startActivity(intent);
                 getActivity().finish();
+            }
+        });
+
+        logoutS_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.show();
             }
         });
         getUsername();

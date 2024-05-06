@@ -4,11 +4,14 @@ import static android.content.ContentValues.TAG;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,8 +45,9 @@ import java.util.List;
 import java.util.Map;
 
 public class SalaryActivity extends AppCompatActivity {
-    TextView total_salary_tv, status_salary_tv, start_date_salary_tv, payday_salary_tv;
+    TextView total_salary_tv, status_salary_tv, start_date_salary_tv, payday_salary_tv, dialog_title, dialog_message;
     Button received_salary_btn, button_yes, button_no;
+
     private RecyclerView recyclerView;
     private SalaryAdapter adapter;
     private List<Salary> salaries = new ArrayList<>();
@@ -60,6 +64,7 @@ public class SalaryActivity extends AppCompatActivity {
         start_date_salary_tv = findViewById(R.id.start_date_salary_tv);
         received_salary_btn = findViewById(R.id.received_salary_btn);
 
+
         recyclerView = findViewById(R.id.salary_recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new SalaryAdapter(salaries);
@@ -67,6 +72,13 @@ public class SalaryActivity extends AppCompatActivity {
 
         dialog=new Dialog(SalaryActivity.this);
         dialog.setContentView(R.layout.custom_yes_no_dialog);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog_title = dialog.findViewById(R.id.dialog_title);
+        dialog_message = dialog.findViewById(R.id.dialog_message);
+
+        dialog_title.setText("Received Salary");
+        dialog_message.setText("Do you want to receive salary?");
+
 
 
         button_yes =dialog.findViewById(R.id.button_yes);

@@ -46,7 +46,7 @@ public class StaffCalendarFragment extends Fragment {
     TextView start_end_date_tv, status_closed_tv, title_timetable_tv;
     Button network_dialog_btn;
     EditText ip_shift_et;
-    Button add_shift_btn,cancel_btn;
+    Button add_shift_btn;
     Dialog dialog, networkDialog;
     ImageView loading_imgv;
     AlertDialog loadDialog;
@@ -132,12 +132,7 @@ public class StaffCalendarFragment extends Fragment {
 
         });
 
-        cancel_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dialog.dismiss();
-            }
-        });
+
 
         network_dialog_btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -389,7 +384,6 @@ public class StaffCalendarFragment extends Fragment {
 
         ip_shift_et=dialog.findViewById(R.id.ip_shift_et);
         add_shift_btn =dialog.findViewById(R.id.add_shift_btn);
-        cancel_btn =dialog.findViewById(R.id.cancel_btn);
 
         networkDialog = new Dialog(getContext());
         networkDialog.setContentView(R.layout.custom_network_dialog);
