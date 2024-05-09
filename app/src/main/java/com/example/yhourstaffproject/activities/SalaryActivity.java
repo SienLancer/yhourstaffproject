@@ -47,7 +47,7 @@ import java.util.Map;
 public class SalaryActivity extends AppCompatActivity {
     TextView total_salary_tv, status_salary_tv, start_date_salary_tv, payday_salary_tv, dialog_title, dialog_message;
     Button received_salary_btn, button_yes, button_no;
-
+    ImageView back_salary_btn;
     private RecyclerView recyclerView;
     private SalaryAdapter adapter;
     private List<Salary> salaries = new ArrayList<>();
@@ -63,6 +63,7 @@ public class SalaryActivity extends AppCompatActivity {
         total_salary_tv = findViewById(R.id.total_salary_tv);
         start_date_salary_tv = findViewById(R.id.start_date_salary_tv);
         received_salary_btn = findViewById(R.id.received_salary_btn);
+        back_salary_btn = findViewById(R.id.back_salary_btn);
 
 
         recyclerView = findViewById(R.id.salary_recycler_view);
@@ -84,7 +85,12 @@ public class SalaryActivity extends AppCompatActivity {
         button_yes =dialog.findViewById(R.id.button_yes);
         button_no =dialog.findViewById(R.id.button_no);
 
-
+        back_salary_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
 
         received_salary_btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -233,9 +239,11 @@ public class SalaryActivity extends AppCompatActivity {
                                     public void onComplete(@NonNull Task<Void> task) {
                                         if (task.isSuccessful()) {
                                             Log.d(TAG, "Data added successfully");
+                                            Toast.makeText(SalaryActivity.this, "Successfully received salary", Toast.LENGTH_SHORT).show();
 
                                         } else {
                                             Log.d(TAG, "Failed to add data");
+                                            Toast.makeText(SalaryActivity.this, "Failed to receive salary", Toast.LENGTH_SHORT).show();
                                         }
                                     }
                                 });

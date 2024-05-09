@@ -111,7 +111,12 @@ public class StaffProfileFragment extends Fragment {
                 startActivity(intent);
             }
         });
-
+        button_no.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
         button_yes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

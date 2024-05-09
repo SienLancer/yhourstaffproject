@@ -13,6 +13,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -39,6 +40,7 @@ public class UpdateProfileActivity extends AppCompatActivity {
     EditText staff_name_update_edt, staff_phone_update_edt, staff_address_update_edt;
     TextView staff_dob_update_edt;
     Button update_profile_btn;
+    ImageButton backSignUpS_imgBtn;
     ImageView loading_imgv;
     private DatePickerDialog.OnDateSetListener dateSetListener;
     AlertDialog loadDialog;
@@ -55,8 +57,16 @@ public class UpdateProfileActivity extends AppCompatActivity {
         staff_phone_update_edt = findViewById(R.id.staff_phone_update_edt);
         staff_address_update_edt = findViewById(R.id.staff_address_update_edt);
         update_profile_btn = findViewById(R.id.update_profile_btn);
+        backSignUpS_imgBtn = findViewById(R.id.backSignUpS_imgBtn);
         loadDialog();
         getUsername();
+
+        backSignUpS_imgBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
 
         update_profile_btn.setOnClickListener(new View.OnClickListener() {
             @Override

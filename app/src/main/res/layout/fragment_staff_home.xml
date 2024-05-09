@@ -32,7 +32,7 @@
                 android:text="Hello Minh Tri"
                 android:textColor="#979797"
                 android:fontFamily="@font/roboto_bold"
-                android:textSize="32sp" />
+                android:textSize="28sp" />
 
             <TextView
                 android:id="@+id/slogan_tv"
@@ -43,7 +43,7 @@
                 android:fontFamily="@font/roboto_light_italic"
                 android:text="Let’s start a wonderful new day!"
                 android:textColor="@color/black"
-                android:textSize="12sp" />
+                android:textSize="14sp" />
 
             <TextView
                 android:id="@+id/textView888"
@@ -61,11 +61,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="20dp"
+                android:padding="5dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="30dp"
+                android:background="@drawable/bg_signin_btn"
                 android:fontFamily="@font/roboto_bold"
-                android:text="17.500.000 VND"
-                android:textColor="#8C5111"
+                android:text="Not activated VND"
+                android:textColor="#FFEA9E"
                 android:textSize="32sp"
                 android:textStyle="bold" />
         </LinearLayout>
@@ -104,14 +106,13 @@
                 android:id="@+id/scan_txt"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="4dp"
+                android:layout_marginBottom="56dp"
                 android:fontFamily="@font/roboto_light_italic"
                 android:text="Scan QR"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/scanQr_imgBtn"
-                app:layout_constraintVertical_bias="0.263" />
+                app:layout_constraintHorizontal_bias="0.532"
+                app:layout_constraintStart_toStartOf="parent" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>
